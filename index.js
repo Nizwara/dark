@@ -918,7 +918,7 @@ export default {
                   uri.searchParams.set("security", port == 443 ? "tls" : "none");
                   uri.searchParams.set("sni", port == 443 ? APP_DOMAIN : "");
                   uri.searchParams.set("path", `/${prx.prxIP}-${prx.prxPort}`);
-                  uri.hash = `${result.length + 1} ${getFlagEmoji(prx.country)} ${prx.org} VLESS/WS/${port == 443 ? "TLS" : "NTLS"} [${serviceName}]`;
+                  uri.hash = `${result.length + 1} ${getFlagEmoji(prx.country)} ${prx.org} VLESS/WS/${port == 443 ? "TLS" : "NTLS"}`;
                 } else if (protocol == atob(horse)) { // Trojan
                   uri.searchParams.set("encryption", "none");
                   uri.searchParams.set("type", "ws");
@@ -927,14 +927,14 @@ export default {
                   uri.searchParams.set("security", port == 443 ? "tls" : "none");
                   uri.searchParams.set("sni", port == 443 ? APP_DOMAIN : "");
                   uri.searchParams.set("path", `/${prx.prxIP}-${prx.prxPort}`);
-                  uri.hash = `${result.length + 1} ${getFlagEmoji(prx.country)} ${prx.org} Trojan/WS/${port == 443 ? "TLS" : "NTLS"} [${serviceName}]`;
+                  uri.hash = `${result.length + 1} ${getFlagEmoji(prx.country)} ${prx.org} Trojan/WS/${port == 443 ? "TLS" : "NTLS"}`;
                 } else if (protocol == "ss") { // Shadowsocks
                   uri.username = btoa(`none:${uuid}`);
                   uri.searchParams.set(
                     "plugin",
                     `${atob(v2)}-plugin${port == 80 ? "" : ";tls"};mux=0;mode=websocket;path=/${prx.prxIP}-${prx.prxPort};host=${APP_DOMAIN}`
                   );
-                  uri.hash = `${result.length + 1} ${getFlagEmoji(prx.country)} ${prx.org} Shadowsocks/WS/${port == 443 ? "TLS" : "NTLS"} [${serviceName}]`;
+                  uri.hash = `${result.length + 1} ${getFlagEmoji(prx.country)} ${prx.org} Shadowsocks/WS/${port == 443 ? "TLS" : "NTLS"}`;
                 }
 
                 result.push(uri.toString());
