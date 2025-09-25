@@ -800,30 +800,41 @@ async function getAllConfig(request) {
     <script>
         function registerDomain() {
             const domainInputElement = document.getElementById("new-domain-input");
+            const registerButton = domainInputElement.nextElementSibling; // Get the button
             const rawDomain = domainInputElement.value.toLowerCase();
             const domain = rawDomain + "." + rootDomain;
 
             if (!rawDomain || rawDomain.includes(' ')) {
-                windowInfoContainer.innerText = "Invalid input!";
+                showToast("Invalid input! ❌");
                 return;
             }
 
-            windowInfoContainer.innerText = "Pushing request...";
+            // Disable button and input
+            domainInputElement.disabled = true;
+            registerButton.disabled = true;
+            showToast("Processing... ⏳");
 
             const url = "https://" + rootDomain + "/api/v1/domains/put?domain=" + domain;
-            const res = fetch(url).then((res) => {
+            fetch(url).then((res) => {
                 if (res.status == 200) {
-                    windowInfoContainer.innerText = "Done!";
+                    showToast("Success! ✅");
                     domainInputElement.value = "";
                     isDomainListFetched = false;
                     getDomainList();
                 } else {
                     if (res.status == 409) {
-                        windowInfoContainer.innerText = "Domain exists!";
+                        showToast("Domain already exists! ⚠️");
                     } else {
-                        windowInfoContainer.innerText = "Error " + res.status;
+                        showToast("Error: " + res.status + " ❌");
                     }
                 }
+            }).catch(err => {
+                showToast("An error occurred. ❌");
+                console.error(err);
+            }).finally(() => {
+                // Re-enable button and input
+                domainInputElement.disabled = false;
+                registerButton.disabled = false;
             });
         }
 
