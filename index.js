@@ -1718,10 +1718,10 @@ class CloudflareApi {
 
       const badWordsListRes = await fetch(BAD_WORDS_LIST);
       if (badWordsListRes.status == 200) {
-        const badWordsList = (await badWordsListRes.text()).split("\n");
+        const badWordsList = (await badWordsListRes.text()).split("\n").filter(b => b.trim() !== '');
         const subdomain = domain.replace("." + rootDomain, "");
         for (const badWord of badWordsList) {
-          if (subdomain.includes(badWord.toLowerCase())) {
+          if (badWord && new RegExp(`\\b${badWord.toLowerCase()}\\b`).test(subdomain)) {
             return 403;
           }
         }
@@ -1743,6 +1743,7 @@ class CloudflareApi {
       }),
       headers: {
         ...this.headers,
+        'Content-Type': 'application/json'
       },
     });
 
