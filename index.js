@@ -1719,8 +1719,9 @@ class CloudflareApi {
       const badWordsListRes = await fetch(BAD_WORDS_LIST);
       if (badWordsListRes.status == 200) {
         const badWordsList = (await badWordsListRes.text()).split("\n");
+        const subdomain = domain.replace("." + rootDomain, "");
         for (const badWord of badWordsList) {
-          if (domain.includes(badWord.toLowerCase())) {
+          if (subdomain.includes(badWord.toLowerCase())) {
             return 403;
           }
         }
