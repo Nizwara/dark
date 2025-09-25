@@ -12,12 +12,13 @@ let cachedPrxList = [];
 
 const horse = "dHJvamFu";
 const flash = "dmxlc3M=";
+const vmess = "dm1lc3M=";
 const v2 = "djJyYXk=";
 const neko = "Y2xhc2g=";
 
 const APP_DOMAIN = `${serviceName}.${rootDomain}`;
 const PORTS = [443, 80];
-const PROTOCOLS = [atob(horse), atob(flash), "ss"];
+const PROTOCOLS = [atob(horse), atob(flash), atob(vmess), "ss"];
 const KV_PRX_URL = "https://raw.githubusercontent.com/Nizwara/dark/refs/heads/main/kvProxyList.json";
 const PRX_BANK_URL = "https://raw.githubusercontent.com/Nizwara/dark/refs/heads/main/proxyList.txt";
 const NAMAWEB = 'DARK-SYSTEM'
@@ -188,7 +189,7 @@ async function getAllConfig(request) {
             const CHECK_API = `https://${url.hostname}/geo-ip?ip=`;
             const healthCheckUrl = `${CHECK_API}${ipPort}`;
 
-            let vlessUrl, trojanUrl, ssUrl;
+            let vlessUrl, trojanUrl, ssUrl, vmessUrl;
 
             if (selectedConfigType === 'tls') {
                 vlessUrl = new URL(`${atob(flash)}://bug.com`);
@@ -200,7 +201,7 @@ async function getAllConfig(request) {
                 vlessUrl.searchParams.set("encryption", "none");
                 vlessUrl.searchParams.set("type", "ws");
                 vlessUrl.searchParams.set("sni", APP_DOMAIN);
-                vlessUrl.hash = `${baseId + 1} ${getFlagEmoji(prx.country)} ${prx.org}`;
+                vlessUrl.hash = `${getFlagEmoji(prx.country)} ${prx.org}`;
 
                 trojanUrl = new URL(`${atob(horse)}://bug.com`);
                 trojanUrl.port = "443";
@@ -210,7 +211,7 @@ async function getAllConfig(request) {
                 trojanUrl.searchParams.set("host", APP_DOMAIN);
                 trojanUrl.searchParams.set("type", "ws");
                 trojanUrl.searchParams.set("sni", APP_DOMAIN);
-                trojanUrl.hash = `${baseId + 1} ${getFlagEmoji(prx.country)} ${prx.org}`;
+                trojanUrl.hash = `${getFlagEmoji(prx.country)} ${prx.org}`;
 
                 ssUrl = new URL(`ss://${btoa(`none:${uuid}`)}@${APP_DOMAIN}:443`);
                 ssUrl.searchParams.set("encryption", "none");
@@ -230,7 +231,7 @@ async function getAllConfig(request) {
                 vlessUrl.searchParams.set("host", APP_DOMAIN);
                 vlessUrl.searchParams.set("encryption", "none");
                 vlessUrl.searchParams.set("type", "ws");
-                vlessUrl.hash = `${baseId + 1} ${getFlagEmoji(prx.country)} ${prx.org}`;
+                vlessUrl.hash = `${getFlagEmoji(prx.country)} ${prx.org}`;
 
                 trojanUrl = new URL(`${atob(horse)}://bug.com`);
                 trojanUrl.port = "80";
@@ -239,7 +240,7 @@ async function getAllConfig(request) {
                 trojanUrl.searchParams.set("path", `/${prx.prxIP}-${prx.prxPort}`);
                 trojanUrl.searchParams.set("host", APP_DOMAIN);
                 trojanUrl.searchParams.set("type", "ws");
-                trojanUrl.hash = `${baseId + 1} ${getFlagEmoji(prx.country)} ${prx.org}`;
+                trojanUrl.hash = `${getFlagEmoji(prx.country)} ${prx.org}`;
 
                 ssUrl = new URL(`ss://${btoa(`none:${uuid}`)}@${APP_DOMAIN}:80`);
                 ssUrl.searchParams.set("encryption", "none");
@@ -249,6 +250,22 @@ async function getAllConfig(request) {
                 ssUrl.searchParams.set("security", "none");
                 ssUrl.hash = `${prx.org} ${getFlagEmoji(prx.country)}`;
             }
+
+            const vmessConfig = {
+                v: "2",
+                ps: `${getFlagEmoji(prx.country)} ${prx.org}`,
+                add: APP_DOMAIN,
+                port: selectedConfigType === 'tls' ? "443" : "80",
+                id: uuid,
+                aid: 0,
+                net: "ws",
+                type: "none",
+                host: APP_DOMAIN,
+                path: `/${prx.prxIP}-${prx.prxPort}`,
+                tls: selectedConfigType === 'tls' ? "tls" : "",
+                sni: selectedConfigType === 'tls' ? APP_DOMAIN : ""
+            };
+            vmessUrl = "vmess://" + btoa(JSON.stringify(vmessConfig));
 
             return `
                <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
@@ -281,9 +298,7 @@ async function getAllConfig(request) {
       <div class="grid grid-cols-2 gap-2 mt-4 text-sm">
         <button class="w-full p-2 rounded-md text-xs font-semibold text-black dark:text-white bg-yellow-400 hover:bg-yellow-500 dark:bg-indigo-500 dark:hover:bg-indigo-600 transition-colors duration-200" onclick="copyConfig('${vlessUrl.toString()}')">VLESS ${selectedConfigType === 'tls' ? 'TLS' : 'NTLS'}</button>
         <button class="w-full p-2 rounded-md text-xs font-semibold text-black dark:text-white bg-yellow-400 hover:bg-yellow-500 dark:bg-indigo-500 dark:hover:bg-indigo-600 transition-colors duration-200" onclick="copyConfig('${trojanUrl.toString()}')">TROJAN ${selectedConfigType === 'tls' ? 'TLS' : 'NTLS'}</button>
-      </div>
-
-      <div class="mt-2">
+        <button class="w-full p-2 rounded-md text-xs font-semibold text-black dark:text-white bg-yellow-400 hover:bg-yellow-500 dark:bg-indigo-500 dark:hover:bg-indigo-600 transition-colors duration-200" onclick="copyConfig('${vmessUrl}')">VMESS ${selectedConfigType === 'tls' ? 'TLS' : 'NTLS'}</button>
         <button class="w-full p-2 rounded-md text-xs font-semibold text-black dark:text-white bg-yellow-400 hover:bg-yellow-500 dark:bg-indigo-500 dark:hover:bg-indigo-600 transition-colors duration-200" onclick="copyConfig('${ssUrl.toString()}')">SHADOWSOCKS ${selectedConfigType === 'tls' ? 'TLS' : 'NTLS'}</button>
       </div>
     </div>
@@ -351,32 +366,6 @@ async function getAllConfig(request) {
 
       // Local variable
       let rawConfig = "";
-
-      function getDomainList() {
-        if (isDomainListFetched) return;
-        isDomainListFetched = true;
-
-        windowInfoContainer.innerText = "Fetching data...";
-
-        const url = "/api/v1/domains";
-        const res = fetch(url, { method: 'GET' }).then(async (res) => {
-          const domainListContainer = document.getElementById("container-domains");
-          domainListContainer.innerHTML = "";
-
-          if (res.status == 200) {
-            windowInfoContainer.innerText = "Done!";
-            const respJson = await res.json();
-            for (const domain of respJson) {
-              const domainElement = document.createElement("p");
-              domainElement.classList.add("w-full", "bg-amber-400", "rounded-md");
-              domainElement.innerText = domain;
-              domainListContainer.appendChild(domainElement);
-            }
-          } else {
-            windowInfoContainer.innerText = "Failed!";
-          }
-        });
-      }
 
       function checkRegion() {
         for (let i = 0; ; i++) {
@@ -783,17 +772,6 @@ async function getAllConfig(request) {
 
 export default {
   async fetch(request, env, ctx) {
-    // Handle CORS preflight requests
-    if (request.method === "OPTIONS") {
-      return new Response(null, {
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Methods": "GET, HEAD, POST, PUT, OPTIONS",
-          "Access-Control-Allow-Headers": "*",
-        },
-      });
-    }
-
     try {
       const url = new URL(request.url);
       const myurl = "geovpn.vercel.app";
@@ -918,7 +896,7 @@ export default {
                   uri.searchParams.set("security", port == 443 ? "tls" : "none");
                   uri.searchParams.set("sni", port == 443 ? APP_DOMAIN : "");
                   uri.searchParams.set("path", `/${prx.prxIP}-${prx.prxPort}`);
-                  uri.hash = `${result.length + 1} ${getFlagEmoji(prx.country)} ${prx.org} VLESS/WS/${port == 443 ? "TLS" : "NTLS"} [${serviceName}]`;
+                  uri.hash = `${getFlagEmoji(prx.country)} ${prx.org} VLESS/WS/${port == 443 ? "TLS" : "NTLS"}`;
                 } else if (protocol == atob(horse)) { // Trojan
                   uri.searchParams.set("encryption", "none");
                   uri.searchParams.set("type", "ws");
@@ -927,14 +905,31 @@ export default {
                   uri.searchParams.set("security", port == 443 ? "tls" : "none");
                   uri.searchParams.set("sni", port == 443 ? APP_DOMAIN : "");
                   uri.searchParams.set("path", `/${prx.prxIP}-${prx.prxPort}`);
-                  uri.hash = `${result.length + 1} ${getFlagEmoji(prx.country)} ${prx.org} Trojan/WS/${port == 443 ? "TLS" : "NTLS"} [${serviceName}]`;
+                  uri.hash = `${getFlagEmoji(prx.country)} ${prx.org} Trojan/WS/${port == 443 ? "TLS" : "NTLS"}`;
+                } else if (protocol == atob(vmess)) { // VMess
+                    const vmessConfig = {
+                        v: "2",
+                        ps: `${getFlagEmoji(prx.country)} ${prx.org} VMess/WS/${port == 443 ? "TLS" : "NTLS"}`,
+                        add: APP_DOMAIN,
+                        port: port.toString(),
+                        id: uuid,
+                        aid: 0,
+                        net: "ws",
+                        type: "none",
+                        host: APP_DOMAIN,
+                        path: `/${prx.prxIP}-${prx.prxPort}`,
+                        tls: port == 443 ? "tls" : "",
+                        sni: port == 443 ? APP_DOMAIN : ""
+                    };
+                    result.push("vmess://" + btoa(JSON.stringify(vmessConfig)));
+                    continue;
                 } else if (protocol == "ss") { // Shadowsocks
                   uri.username = btoa(`none:${uuid}`);
                   uri.searchParams.set(
                     "plugin",
                     `${atob(v2)}-plugin${port == 80 ? "" : ";tls"};mux=0;mode=websocket;path=/${prx.prxIP}-${prx.prxPort};host=${APP_DOMAIN}`
                   );
-                  uri.hash = `${result.length + 1} ${getFlagEmoji(prx.country)} ${prx.org} Shadowsocks/WS/${port == 443 ? "TLS" : "NTLS"} [${serviceName}]`;
+                  uri.hash = `${getFlagEmoji(prx.country)} ${prx.org} Shadowsocks/WS/${port == 443 ? "TLS" : "NTLS"}`;
                 }
 
                 result.push(uri.toString());
@@ -1053,6 +1048,8 @@ async function websocketHandler(request) {
             protocolHeader = readHorseHeader(chunk);
           } else if (protocol === atob(flash)) {
             protocolHeader = readFlashHeader(chunk);
+          } else if (protocol === atob(vmess)) {
+            protocolHeader = readVmessHeader(chunk);
           } else if (protocol === "ss") {
             protocolHeader = readSsHeader(chunk);
           } else {
@@ -1128,6 +1125,10 @@ async function protocolSniffer(buffer) {
   const flashDelimiter = new Uint8Array(buffer.slice(1, 17));
   if (arrayBufferToHex(flashDelimiter).match(/^[0-9a-f]{8}[0-9a-f]{4}4[0-9a-f]{3}[89ab][0-9a-f]{3}[0-9a-f]{12}$/i)) {
     return atob(flash);
+  }
+
+  if (arrayBufferToHex(new Uint8Array(buffer.slice(0, 1))).match(/0[1-9a-f]/)) {
+      return atob(vmess);
   }
 
   return "ss";
@@ -1257,6 +1258,63 @@ function makeReadableWebSocketStream(webSocketServer, earlyDataHeader, log) {
   });
 
   return stream;
+}
+
+function readVmessHeader(vmessBuffer) {
+    const view = new DataView(vmessBuffer);
+    const version = view.getUint8(0);
+    if (version !== 1) {
+        return { hasError: true, message: `Invalid VMess version: ${version}` };
+    }
+
+    // Skip UUID (16 bytes), alterId (2 bytes), security (1 byte)
+    let offset = 19;
+
+    const cmd = view.getUint8(offset);
+    const isUDP = (cmd & 0x02) === 0x02;
+    offset += 1;
+
+    const port = view.getUint16(offset);
+    offset += 2;
+
+    const addressType = view.getUint8(offset);
+    offset += 1;
+
+    let address = "";
+    let addressLength = 0;
+
+    switch (addressType) {
+        case 1: // IPv4
+            addressLength = 4;
+            address = new Uint8Array(vmessBuffer.slice(offset, offset + addressLength)).join('.');
+            break;
+        case 2: // FQDN
+            addressLength = view.getUint8(offset);
+            offset += 1;
+            address = new TextDecoder().decode(vmessBuffer.slice(offset, offset + addressLength));
+            break;
+        case 3: // IPv6
+            addressLength = 16;
+            const ipv6 = [];
+            for (let i = 0; i < 8; i++) {
+                ipv6.push(view.getUint16(offset + i * 2).toString(16));
+            }
+            address = ipv6.join(':');
+            break;
+        default:
+            return { hasError: true, message: `Invalid address type: ${addressType}` };
+    }
+    offset += addressLength;
+
+    return {
+        hasError: false,
+        addressRemote: address,
+        portRemote: port,
+        rawDataIndex: offset,
+        rawClientData: vmessBuffer.slice(offset),
+        isUDP: isUDP,
+        version: new Uint8Array([1, 0]),
+    };
 }
 
 function readSsHeader(ssBuffer) {
