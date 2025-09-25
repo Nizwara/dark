@@ -798,6 +798,7 @@ async function getAllConfig(request) {
 </footer>
 
     <script>
+        const rootDomain = "${rootDomain}";
         function registerDomain() {
             const domainInputElement = document.getElementById("new-domain-input");
             const registerButton = domainInputElement.nextElementSibling; // Get the button
