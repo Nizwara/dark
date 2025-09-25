@@ -251,9 +251,7 @@ async function getAllConfig(request) {
             }
 
             return `
-               <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
-
-  <div class="lozad scale-95 mb-4 p-6 bg-blue-300/30 dark:bg-slate-800 rounded-lg shadow-lg border border-white/20 transition-all duration-300 hover:scale-105 backdrop-blur-md flex flex-col">
+                <div class="lozad scale-95 mb-4 p-6 bg-blue-300/30 dark:bg-slate-800 rounded-lg shadow-lg border border-white/20 transition-all duration-300 hover:scale-105 backdrop-blur-md flex flex-col">
 
     <div class="flex justify-between items-center">
       <span class="flex items-center">
@@ -313,194 +311,6 @@ async function getAllConfig(request) {
             statusElement.innerHTML = '<span class="text-red-500 font-bold">ERROR</span>';
         });
 </script>
-
-                    <script>
-    function toggleDropdown() {
-        const dropdownMenu = document.getElementById('dropdown-menu');
-        dropdownMenu.classList.toggle('hidden');
-    }
-</script>
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    const loadingScreen = document.getElementById('loading-screen');
-    if (loadingScreen) {
-      // Tunggu 5 detik sebelum memulai transisi
-      setTimeout(() => {
-        // Atur opacity menjadi 0 untuk memulai efek fade out
-        loadingScreen.style.opacity = '0';
-
-        // Setelah efek fade out selesai (500ms), sembunyikan elemen
-        setTimeout(() => {
-          loadingScreen.style.display = 'none';
-        }, 500); // Durasi ini harus sama dengan durasi transisi di CSS (duration-500)
-      }, 1000); // <-- Ini adalah jeda 5 detik
-    }
-  });
-
-      // Shared
-      const rootDomain = "${serviceName}.${rootDomain}";
-      const notification = document.getElementById("notification-badge");
-      const windowContainer = document.getElementById("container-window");
-      const windowInfoContainer = document.getElementById("container-window-info");
-      // const converterUrl =
-      //   "https://script.google.com/macros/s/AKfycbwwVeHNUlnP92syOP82p1dOk_-xwBgRIxkTjLhxxZ5UXicrGOEVNc5JaSOu0Bgsx_gG/exec";
-
-
-      // Switches
-      let isDomainListFetched = false;
-
-      // Local variable
-      let rawConfig = "";
-
-      function getDomainList() {
-        if (isDomainListFetched) return;
-        isDomainListFetched = true;
-
-        windowInfoContainer.innerText = "Fetching data...";
-
-        const url = "/api/v1/domains";
-        const res = fetch(url, { method: 'GET' }).then(async (res) => {
-          const domainListContainer = document.getElementById("container-domains");
-          domainListContainer.innerHTML = "";
-
-          if (res.status == 200) {
-            windowInfoContainer.innerText = "Done!";
-            const respJson = await res.json();
-            for (const domain of respJson) {
-              const domainElement = document.createElement("p");
-              domainElement.classList.add("w-full", "bg-amber-400", "rounded-md");
-              domainElement.innerText = domain;
-              domainListContainer.appendChild(domainElement);
-            }
-          } else {
-            windowInfoContainer.innerText = "Failed!";
-          }
-        });
-      }
-
-      function checkRegion() {
-        for (let i = 0; ; i++) {
-          const containerRegionCheck = document.getElementById("container-region-check-" + i);
-          const configSample = document.getElementById("config-sample-" + i).value.replaceAll(" ", "");
-          if (containerRegionCheck == undefined) break;
-
-          const res = fetch(
-            "https://api.foolvpn.me/regioncheck?config=" + encodeURIComponent(configSample)
-          ).then(async (res) => {
-            if (res.status == 200) {
-              containerRegionCheck.innerHTML = "<hr>";
-              for (const result of await res.json()) {
-                containerRegionCheck.innerHTML += "<p>" + result.name + ": " + result.region + "</p>";
-              }
-            }
-          });
-        }
-      }
-
-      function checkGeoip() {
-        const containerIP = document.getElementById("container-info-ip");
-        const containerCountry = document.getElementById("container-info-country");
-        const containerISP = document.getElementById("container-info-isp");
-        const res = fetch("https://" + rootDomain + "/api/v1/myip").then(async (res) => {
-          if (res.status == 200) {
-            const respJson = await res.json();
-            containerIP.innerText = "IP: " + respJson.ip;
-            containerCountry.innerText = "Country: " + respJson.country;
-            containerISP.innerText = "ISP: " + respJson.asOrganization;
-          }
-        });
-      }
-
-      window.onload = () => {
-        checkGeoip();
-        const observer = lozad(".lozad", {
-          load: function (el) {
-            el.classList.remove("scale-95");
-          },
-        });
-        observer.observe();
-      };
-
-      function showToast(message) {
-            const existingToast = document.querySelector('.toast');
-            if (existingToast) {
-                existingToast.remove();
-            }
-            const toast = document.createElement('div');
-            toast.className = 'toast';
-            toast.textContent = message;
-            document.body.appendChild(toast);
-            setTimeout(() => {
-                toast.classList.add('show');
-            }, 10);
-            setTimeout(() => {
-                toast.classList.remove('show');
-                toast.addEventListener('transitionend', () => {
-                    toast.remove();
-                });
-            }, 2000);
-        }
-
-        function copyConfig(textToCopy) {
-            navigator.clipboard.writeText(textToCopy)
-                .then(() => {
-                    showToast('Copied Successfully!! ✅');
-                })
-                .catch(err => {
-                    console.error('Gagal menyalin: ', err);
-                    showToast('Gagal menyalin konfigurasi. ❌');
-                });
-        }
-
-        document.getElementById('search-bar').addEventListener('keydown', (event) => {
-            if (event.key === 'Enter') {
-                document.getElementById('search-button').click();
-            }
-        });
-
-        document.getElementById('search-button').addEventListener('click', () => {
-            const query = document.getElementById('search-bar').value;
-            const url = new URL(window.location.href);
-            url.searchParams.set('search', query);
-            url.searchParams.set('page', '0');
-            window.location.href = url.toString();
-        });
-
-        function goToHomePage(hostName) {
-            const url = new URL(window.location.href);
-            url.searchParams.delete('search');
-            url.searchParams.set('page', '0');
-            window.location.href = url.toString();
-        }
-
-        document.getElementById('configType').addEventListener('change', (event) => {
-            const configType = event.target.value;
-            const url = new URL(window.location.href);
-            url.searchParams.set('configType', configType);
-            url.searchParams.set('page', '0');
-            window.location.href = url.toString();
-        });
-
-        function goToPage(page) {
-            const url = new URL(window.location.href);
-            url.searchParams.set('page', page);
-            window.location.href = url.toString();
-        }
-
-        // Fungsi untuk memperbarui waktu secara real-time
-        function updateTime() {
-            const now = new Date();
-            const timeElement = document.getElementById('real-time');
-            if (timeElement) {
-                timeElement.textContent = now.toLocaleTimeString('id-ID');
-            }
-        }
-
-        // Panggil fungsi updateTime() setiap 1 detik
-        setInterval(updateTime, 1000);
-    </script>
-
-                </div>
             `;
         })
         .join('');
@@ -658,27 +468,27 @@ async function getAllConfig(request) {
 
         <div class="glass-card mb-6 grid grid-cols-1 gap-4 rounded-md p-4 text-center text-xs font-semibold md:grid-cols-3 md:text-sm sm:grid-cols-2">
             <div class="flex flex-wrap items-center justify-center space-x-6">
-                <p id="container-info-ip" class="flex items-center gap-2 text-blue-500 dark:text-blue-300">
+                 <p class="flex items-center gap-2 text-blue-500 dark:text-blue-300">
                     <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z" />
                     </svg>
-                    IP: <span class="font-bold text-slate-800 dark:text-white">127.0.0.1</span>
+                    IP: <span id="ip-address" class="font-bold text-slate-800 dark:text-white">127.0.0.1</span>
                 </p>
-                <p id="container-info-country" class="flex items-center gap-2 text-green-500 dark:text-green-300">
+                <p class="flex items-center gap-2 text-green-500 dark:text-green-300">
                     <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zM4 12c0-2.61 1.67-4.82 4-5.65V12c0 2.61-1.67 4.82-4 5.65z" />
                     </svg>
-                    Country: <span class="font-bold text-slate-800 dark:text-white">Singapore</span>
+                    Country: <span id="country-name" class="font-bold text-slate-800 dark:text-white">Singapore</span>
                 </p>
             </div>
-            <p id="container-info-isp" class="flex items-center justify-center gap-2 text-yellow-500 dark:text-yellow-300">
+            <p class="flex items-center justify-center gap-2 text-yellow-500 dark:text-yellow-300">
                 <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" />
                 </svg>
-                ISP: <span class="font-bold text-slate-800 dark:text-white">Localhost</span>
+                ISP: <span id="isp-name" class="font-bold text-slate-800 dark:text-white">Localhost</span>
             </p>
             <div class="col-span-1 flex items-center justify-center gap-4 md:col-span-2">
-                <p class="flex items-center gap-2 text-red-500 dark:text-red-300">
+                 <p class="flex items-center gap-2 text-red-500 dark:text-red-300">
                     <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zM9 17h2v-4H9v4zm4-6h2V7h-2v4z" />
                     </svg>
@@ -769,7 +579,192 @@ async function getAllConfig(request) {
             }
         }
 
+    </script>
+    <script>
+    function toggleDropdown() {
+        const dropdownMenu = document.getElementById('dropdown-menu');
+        dropdownMenu.classList.toggle('hidden');
+    }
+</script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const loadingScreen = document.getElementById('loading-screen');
+    if (loadingScreen) {
+      // Tunggu 5 detik sebelum memulai transisi
+      setTimeout(() => {
+        // Atur opacity menjadi 0 untuk memulai efek fade out
+        loadingScreen.style.opacity = '0';
 
+        // Setelah efek fade out selesai (500ms), sembunyikan elemen
+        setTimeout(() => {
+          loadingScreen.style.display = 'none';
+        }, 500); // Durasi ini harus sama dengan durasi transisi di CSS (duration-500)
+      }, 1000); // <-- Ini adalah jeda 5 detik
+    }
+  });
+
+      // Shared
+      const rootDomain = "${serviceName}.${rootDomain}";
+      const notification = document.getElementById("notification-badge");
+      const windowContainer = document.getElementById("container-window");
+      const windowInfoContainer = document.getElementById("container-window-info");
+      // const converterUrl =
+      //   "https://script.google.com/macros/s/AKfycbwwVeHNUlnP92syOP82p1dOk_-xwBgRIxkTjLhxxZ5UXicrGOEVNc5JaSOu0Bgsx_gG/exec";
+
+
+      // Switches
+      let isDomainListFetched = false;
+
+      // Local variable
+      let rawConfig = "";
+
+      function getDomainList() {
+        if (isDomainListFetched) return;
+        isDomainListFetched = true;
+
+        windowInfoContainer.innerText = "Fetching data...";
+
+        const url = "/api/v1/domains";
+        const res = fetch(url, { method: 'GET' }).then(async (res) => {
+          const domainListContainer = document.getElementById("container-domains");
+          domainListContainer.innerHTML = "";
+
+          if (res.status == 200) {
+            windowInfoContainer.innerText = "Done!";
+            const respJson = await res.json();
+            for (const domain of respJson) {
+              const domainElement = document.createElement("p");
+              domainElement.classList.add("w-full", "bg-amber-400", "rounded-md");
+              domainElement.innerText = domain;
+              domainListContainer.appendChild(domainElement);
+            }
+          } else {
+            windowInfoContainer.innerText = "Failed!";
+          }
+        });
+      }
+
+      function checkRegion() {
+        for (let i = 0; ; i++) {
+          const containerRegionCheck = document.getElementById("container-region-check-" + i);
+          const configSample = document.getElementById("config-sample-" + i).value.replaceAll(" ", "");
+          if (containerRegionCheck == undefined) break;
+
+          const res = fetch(
+            "https://api.foolvpn.me/regioncheck?config=" + encodeURIComponent(configSample)
+          ).then(async (res) => {
+            if (res.status == 200) {
+              containerRegionCheck.innerHTML = "<hr>";
+              for (const result of await res.json()) {
+                containerRegionCheck.innerHTML += "<p>" + result.name + ": " + result.region + "</p>";
+              }
+            }
+          });
+        }
+      }
+
+      function checkGeoip() {
+        const ipAddressElement = document.getElementById("ip-address");
+        const countryNameElement = document.getElementById("country-name");
+        const ispNameElement = document.getElementById("isp-name");
+
+        fetch("/api/v1/myip").then(async (res) => {
+          if (res.status == 200) {
+            const respJson = await res.json();
+            ipAddressElement.innerText = respJson.ip;
+            countryNameElement.innerText = respJson.country;
+            ispNameElement.innerText = respJson.asOrganization;
+          }
+        });
+      }
+
+      window.onload = () => {
+        checkGeoip();
+        const observer = lozad(".lozad", {
+          load: function (el) {
+            el.classList.remove("scale-95");
+          },
+        });
+        observer.observe();
+      };
+
+      function showToast(message) {
+            const existingToast = document.querySelector('.toast');
+            if (existingToast) {
+                existingToast.remove();
+            }
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => {
+                toast.classList.add('show');
+            }, 10);
+            setTimeout(() => {
+                toast.classList.remove('show');
+                toast.addEventListener('transitionend', () => {
+                    toast.remove();
+                });
+            }, 2000);
+        }
+
+        function copyConfig(textToCopy) {
+            navigator.clipboard.writeText(textToCopy)
+                .then(() => {
+                    showToast('Copied Successfully!! ✅');
+                })
+                .catch(err => {
+                    console.error('Gagal menyalin: ', err);
+                    showToast('Gagal menyalin konfigurasi. ❌');
+                });
+        }
+
+        document.getElementById('search-bar').addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                document.getElementById('search-button').click();
+            }
+        });
+
+        document.getElementById('search-button').addEventListener('click', () => {
+            const query = document.getElementById('search-bar').value;
+            const url = new URL(window.location.href);
+            url.searchParams.set('search', query);
+            url.searchParams.set('page', '0');
+            window.location.href = url.toString();
+        });
+
+        function goToHomePage(hostName) {
+            const url = new URL(window.location.href);
+            url.searchParams.delete('search');
+            url.searchParams.set('page', '0');
+            window.location.href = url.toString();
+        }
+
+        document.getElementById('configType').addEventListener('change', (event) => {
+            const configType = event.target.value;
+            const url = new URL(window.location.href);
+            url.searchParams.set('configType', configType);
+            url.searchParams.set('page', '0');
+            window.location.href = url.toString();
+        });
+
+        function goToPage(page) {
+            const url = new URL(window.location.href);
+            url.searchParams.set('page', page);
+            window.location.href = url.toString();
+        }
+
+        // Fungsi untuk memperbarui waktu secara real-time
+        function updateTime() {
+            const now = new Date();
+            const timeElement = document.getElementById('real-time');
+            if (timeElement) {
+                timeElement.textContent = now.toLocaleTimeString('id-ID');
+            }
+        }
+
+        // Panggil fungsi updateTime() setiap 1 detik
+        setInterval(updateTime, 1000);
     </script>
 </body>
 </html>
