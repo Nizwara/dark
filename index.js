@@ -196,10 +196,10 @@ async function getAllConfig(request) {
                 vlessUrl.username = uuid;
                 vlessUrl.searchParams.set("security", "tls");
                 vlessUrl.searchParams.set("path", `/${prx.prxIP}-${prx.prxPort}`);
-                vlessUrl.searchParams.set("host", APP_DOMAIN);
+                vlessUrl.searchParams.set("host", rootDomain);
                 vlessUrl.searchParams.set("encryption", "none");
                 vlessUrl.searchParams.set("type", "ws");
-                vlessUrl.searchParams.set("sni", APP_DOMAIN);
+                vlessUrl.searchParams.set("sni", rootDomain);
                 vlessUrl.hash = `${baseId + 1} ${getFlagEmoji(prx.country)} ${prx.org}`;
 
                 trojanUrl = new URL(`${atob(horse)}://bug.com`);
@@ -207,18 +207,18 @@ async function getAllConfig(request) {
                 trojanUrl.username = uuid;
                 trojanUrl.searchParams.set("security", "tls");
                 trojanUrl.searchParams.set("path", `/${prx.prxIP}-${prx.prxPort}`);
-                trojanUrl.searchParams.set("host", APP_DOMAIN);
+                trojanUrl.searchParams.set("host", rootDomain);
                 trojanUrl.searchParams.set("type", "ws");
-                trojanUrl.searchParams.set("sni", APP_DOMAIN);
+                trojanUrl.searchParams.set("sni", rootDomain);
                 trojanUrl.hash = `${baseId + 1} ${getFlagEmoji(prx.country)} ${prx.org}`;
 
-                ssUrl = new URL(`ss://${btoa(`none:${uuid}`)}@${APP_DOMAIN}:443`);
+                ssUrl = new URL(`ss://${btoa(`none:${uuid}`)}@${rootDomain}:443`);
                 ssUrl.searchParams.set("encryption", "none");
                 ssUrl.searchParams.set("type", "ws");
-                ssUrl.searchParams.set("host", APP_DOMAIN);
+                ssUrl.searchParams.set("host", rootDomain);
                 ssUrl.searchParams.set("path", `/${prx.prxIP}-${prx.prxPort}`);
                 ssUrl.searchParams.set("security", "tls");
-                ssUrl.searchParams.set("sni", APP_DOMAIN);
+                ssUrl.searchParams.set("sni", rootDomain);
                 ssUrl.hash = `${prx.org} ${getFlagEmoji(prx.country)}`;
 
             } else { // non-tls
@@ -227,7 +227,7 @@ async function getAllConfig(request) {
                 vlessUrl.username = uuid;
                 vlessUrl.searchParams.set("security", "none");
                 vlessUrl.searchParams.set("path", `/${prx.prxIP}-${prx.prxPort}`);
-                vlessUrl.searchParams.set("host", APP_DOMAIN);
+                vlessUrl.searchParams.set("host", rootDomain);
                 vlessUrl.searchParams.set("encryption", "none");
                 vlessUrl.searchParams.set("type", "ws");
                 vlessUrl.hash = `${baseId + 1} ${getFlagEmoji(prx.country)} ${prx.org}`;
@@ -237,14 +237,14 @@ async function getAllConfig(request) {
                 trojanUrl.username = uuid;
                 trojanUrl.searchParams.set("security", "none");
                 trojanUrl.searchParams.set("path", `/${prx.prxIP}-${prx.prxPort}`);
-                trojanUrl.searchParams.set("host", APP_DOMAIN);
+                trojanUrl.searchParams.set("host", rootDomain);
                 trojanUrl.searchParams.set("type", "ws");
                 trojanUrl.hash = `${baseId + 1} ${getFlagEmoji(prx.country)} ${prx.org}`;
 
-                ssUrl = new URL(`ss://${btoa(`none:${uuid}`)}@${APP_DOMAIN}:80`);
+                ssUrl = new URL(`ss://${btoa(`none:${uuid}`)}@${rootDomain}:80`);
                 ssUrl.searchParams.set("encryption", "none");
                 ssUrl.searchParams.set("type", "ws");
-                ssUrl.searchParams.set("host", APP_DOMAIN);
+                ssUrl.searchParams.set("host", rootDomain);
                 ssUrl.searchParams.set("path", `/${prx.prxIP}-${prx.prxPort}`);
                 ssUrl.searchParams.set("security", "none");
                 ssUrl.hash = `${prx.org} ${getFlagEmoji(prx.country)}`;
@@ -992,7 +992,7 @@ export default {
           const filterVPN = url.searchParams.get("vpn")?.split(",") || PROTOCOLS;
           const filterLimit = parseInt(url.searchParams.get("limit")) || 10;
           const filterFormat = url.searchParams.get("format") || "raw";
-          const fillerDomain = url.searchParams.get("domain") || APP_DOMAIN;
+          const fillerDomain = url.searchParams.get("domain") || rootDomain;
 
           const prxBankUrl = url.searchParams.get("prx-list") || PRX_BANK_URL;
           const prxList = await getPrxList(prxBankUrl)
@@ -1020,26 +1020,26 @@ export default {
                 if (protocol == atob(flash)) { // VLESS
                   uri.searchParams.set("encryption", "none");
                   uri.searchParams.set("type", "ws");
-                  uri.searchParams.set("host", APP_DOMAIN);
+                  uri.searchParams.set("host", rootDomain);
                   uri.username = uuid;
                   uri.searchParams.set("security", port == 443 ? "tls" : "none");
-                  uri.searchParams.set("sni", port == 443 ? APP_DOMAIN : "");
+                  uri.searchParams.set("sni", port == 443 ? rootDomain : "");
                   uri.searchParams.set("path", `/${prx.prxIP}-${prx.prxPort}`);
                   uri.hash = `${result.length + 1} ${getFlagEmoji(prx.country)} ${prx.org} VLESS/WS/${port == 443 ? "TLS" : "NTLS"}`;
                 } else if (protocol == atob(horse)) { // Trojan
                   uri.searchParams.set("encryption", "none");
                   uri.searchParams.set("type", "ws");
-                  uri.searchParams.set("host", APP_DOMAIN);
+                  uri.searchParams.set("host", rootDomain);
                   uri.username = uuid;
                   uri.searchParams.set("security", port == 443 ? "tls" : "none");
-                  uri.searchParams.set("sni", port == 443 ? APP_DOMAIN : "");
+                  uri.searchParams.set("sni", port == 443 ? rootDomain : "");
                   uri.searchParams.set("path", `/${prx.prxIP}-${prx.prxPort}`);
                   uri.hash = `${result.length + 1} ${getFlagEmoji(prx.country)} ${prx.org} Trojan/WS/${port == 443 ? "TLS" : "NTLS"}`;
                 } else if (protocol == "ss") { // Shadowsocks
                   uri.username = btoa(`none:${uuid}`);
                   uri.searchParams.set(
                     "plugin",
-                    `${atob(v2)}-plugin${port == 80 ? "" : ";tls"};mux=0;mode=websocket;path=/${prx.prxIP}-${prx.prxPort};host=${APP_DOMAIN}`
+                    `${atob(v2)}-plugin${port == 80 ? "" : ";tls"};mux=0;mode=websocket;path=/${prx.prxIP}-${prx.prxPort};host=${rootDomain}`
                   );
                   uri.hash = `${result.length + 1} ${getFlagEmoji(prx.country)} ${prx.org} Shadowsocks/WS/${port == 443 ? "TLS" : "NTLS"}`;
                 }
