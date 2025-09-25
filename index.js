@@ -358,8 +358,8 @@ async function getAllConfig(request) {
 
         windowInfoContainer.innerText = "Fetching data...";
 
-        const url = "https://" + rootDomain + "/api/v1/domains/get";
-        const res = fetch(url).then(async (res) => {
+        const url = "/api/v1/domains";
+        const res = fetch(url, { method: 'GET' }).then(async (res) => {
           const domainListContainer = document.getElementById("container-domains");
           domainListContainer.innerHTML = "";
 
@@ -711,47 +711,6 @@ async function getAllConfig(request) {
     </div>
 </div>
 
-    <div
-    id="wildcards-window"
-    class="fixed hidden top-0 right-0 w-full h-full flex justify-center items-center bg-gray-700"
->
-    <div class="w-[75%] h-[30%] flex flex-col gap-1 p-1 text-center rounded-md">
-        <div class="basis-1/6 w-full h-full rounded-md">
-            <div class="flex w-full h-full gap-1 justify-between">
-                <input
-                    id="new-domain-input"
-                    type="text"
-                    placeholder="Input wildcard"
-                    class="basis-11/12 w-full h-full px-6 rounded-md focus:outline-0"
-                />
-                <button
-                    onclick="registerDomain()"
-                    class="p-2 rounded-full bg-amber-400 flex justify-center items-center"
-                >
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 24 24"
-                        fill="currentColor"
-                        class="size-6"
-                    >
-                        <path
-                            fill-rule="evenodd"
-                            d="M16.72 7.72a.75.75 0 0 1 1.06 0l3.75 3.75a.75.75 0 0 1 0 1.06l-3.75 3.75a.75.75 0 1 1-1.06-1.06l2.47-2.47H3a.75.75 0 0 1 0-1.5h16.19l-2.47-2.47a.75.75 0 0 1 0-1.06Z"
-                            clip-rule="evenodd"
-                        ></path>
-                    </svg>
-                </button>
-            </div>
-        </div>
-        <div class="basis-5/6 w-full h-full rounded-md">
-            <div
-                id="container-domains"
-                class="w-full h-full rounded-md flex flex-col gap-1 overflow-scroll scrollbar-hide"
-            ></div>
-        </div>
-    </div>
-</div>
-
     <footer>
     <div class="fixed bottom-4 right-4 flex flex-col items-end gap-3 z-50">
         <button onclick="toggleDropdown()" class="transition-colors rounded-full p-2 block text-white shadow-lg transform hover:scale-105 bg-blue-500 hover:bg-blue-600">
@@ -782,12 +741,6 @@ async function getAllConfig(request) {
                 </button>
             </a>
 
-            <button onclick="toggleWildcardsWindow()" class="bg-indigo-500 hover:bg-indigo-600 rounded-full border-2 border-gray-900 p-2 transition-colors duration-200">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 9V4.5M9 9H4.5M9 9 3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5m0-4.5 5.25 5.25" />
-                </svg>
-            </button>
-
             <button onclick="toggleDarkMode()" class="bg-amber-500 hover:bg-amber-600 rounded-full border-2 border-gray-900 p-2 transition-colors duration-200">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" />
@@ -798,55 +751,12 @@ async function getAllConfig(request) {
 </footer>
 
     <script>
-        function registerDomain() {
-            const domainInputElement = document.getElementById("new-domain-input");
-            const rawDomain = domainInputElement.value.toLowerCase();
-            const domain = domainInputElement.value + "." + rootDomain;
-
-            // Validasi input: izinkan wildcard '*' atau nama subdomain yang valid.
-            // Regex ini memeriksa string yang terdiri dari huruf, angka, tanda hubung, dan titik,
-            // memastikan tidak dimulai atau diakhiri dengan tanda hubung atau titik.
-            const isValidSubdomain = /^[a-z0-9]+(?:[.-][a-z0-9]+)*$/i.test(rawDomain);
-
-            if ((rawDomain !== '*' && !isValidSubdomain) || rawDomain.endsWith(rootDomain)) {
-                windowInfoContainer.innerText = "Invalid Input!";
-                return;
-            }
-
-            windowInfoContainer.innerText = "Pushing request...";
-
-            const url = "https://" + rootDomain + "/api/v1/domains/put?domain=" + domain;
-            const res = fetch(url).then((res) => {
-                if (res.status == 200) {
-                    windowInfoContainer.innerText = "Done!";
-                    domainInputElement.value = "";
-                    isDomainListFetched = false;
-                    getDomainList();
-                } else {
-                    if (res.status == 409) {
-                        windowInfoContainer.innerText = "Domain exists!";
-                    } else {
-                        windowInfoContainer.innerText = "Error " + res.status;
-                    }
-                }
-            });
-        }
-
         document.addEventListener('DOMContentLoaded', () => {
             const savedTheme = localStorage.getItem('theme');
             if (savedTheme === 'light') {
                 document.body.classList.add('light-mode');
             }
         });
-
-        function toggleWildcardsWindow() {
-            const wildcardsWindow = document.getElementById("wildcards-window");
-            wildcardsWindow.classList.toggle("hidden");
-            if (!wildcardsWindow.classList.contains("hidden")) {
-                // Panggil fungsi getDomainList() saat jendela dibuka
-                getDomainList();
-            }
-        }
 
         function toggleDarkMode() {
             const body = document.body;
@@ -873,6 +783,17 @@ async function getAllConfig(request) {
 
 export default {
   async fetch(request, env, ctx) {
+    // Handle CORS preflight requests
+    if (request.method === "OPTIONS") {
+      return new Response(null, {
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Methods": "GET, HEAD, POST, PUT, OPTIONS",
+          "Access-Control-Allow-Headers": "*",
+        },
+      });
+    }
+
     try {
       const url = new URL(request.url);
       const myurl = "geovpn.vercel.app";
@@ -958,35 +879,7 @@ export default {
       } else if (url.pathname.startsWith("/api/v1")) {
         const apiPath = url.pathname.replace("/api/v1", "");
 
-        if (apiPath.startsWith("/domains")) {
-          if (!isApiReady) {
-            return new Response("Api not ready", {
-              status: 500,
-            });
-          }
-
-          const wildcardApiPath = apiPath.replace("/domains", "");
-          const cloudflareApi = new CloudflareApi();
-
-          if (wildcardApiPath == "/get") {
-            const domains = await cloudflareApi.getDomainList();
-            return new Response(JSON.stringify(domains), {
-              headers: {
-                ...CORS_HEADER_OPTIONS,
-              },
-            });
-          } else if (wildcardApiPath == "/put") {
-            const domain = url.searchParams.get("domain");
-            const register = await cloudflareApi.registerDomain(domain);
-
-            return new Response(register.toString(), {
-              status: register,
-              headers: {
-                ...CORS_HEADER_OPTIONS,
-              },
-            });
-          }
-        } else if (apiPath.startsWith("/sub")) {
+        if (apiPath.startsWith("/sub")) {
           const filterCC = url.searchParams.get("cc")?.split(",") || [];
           const filterPort = url.searchParams.get("port")?.split(",") || PORTS;
           const filterVPN = url.searchParams.get("vpn")?.split(",") || PROTOCOLS;
@@ -1654,83 +1547,4 @@ function getFlagEmoji(isoCode) {
     .split("")
     .map((char) => 127397 + char.charCodeAt(0));
   return String.fromCodePoint(...codePoints);
-}
-
-class CloudflareApi {
-  constructor() {
-    this.bearer = `Bearer ${apiKey}`;
-    this.accountID = accountID;
-    this.zoneID = zoneID;
-    this.apiEmail = apiEmail;
-    this.apiKey = apiKey;
-
-    this.headers = {
-      Authorization: this.bearer,
-      "X-Auth-Email": this.apiEmail,
-      "X-Auth-Key": this.apiKey,
-    };
-  }
-
-  async getDomainList() {
-    const url = `https://api.cloudflare.com/client/v4/accounts/${this.accountID}/workers/domains`;
-    const res = await fetch(url, {
-      headers: {
-        ...this.headers,
-      },
-    });
-
-    if (res.status == 200) {
-      const respJson = await res.json();
-
-      return respJson.result.filter((data) => data.service == serviceName).map((data) => data.hostname);
-    }
-
-    return [];
-  }
-
-  async registerDomain(domain) {
-    domain = domain.toLowerCase();
-    const registeredDomains = await this.getDomainList();
-
-    if (!domain.endsWith(rootDomain)) return 400;
-    if (registeredDomains.includes(domain)) return 409;
-
-    try {
-      // Wildcard domains cannot be resolved via fetch, so we skip the test for them.
-      if (!domain.startsWith("*.")) {
-        const domainTest = await fetch(`https://${domain.replaceAll("." + APP_DOMAIN, "")}`);
-        if (domainTest.status == 530) return domainTest.status;
-      }
-
-      const badWordsListRes = await fetch(BAD_WORDS_LIST);
-      if (badWordsListRes.status == 200) {
-        const badWordsList = (await badWordsListRes.text()).split("\n");
-        for (const badWord of badWordsList) {
-          if (domain.includes(badWord.toLowerCase())) {
-            return 403;
-          }
-        }
-      } else {
-        return 403;
-      }
-    } catch (e) {
-      return 400;
-    }
-
-    const url = `https://api.cloudflare.com/client/v4/accounts/${this.accountID}/workers/domains`;
-    const res = await fetch(url, {
-      method: "PUT",
-      body: JSON.stringify({
-        environment: "production",
-        hostname: domain,
-        service: serviceName,
-        zone_id: this.zoneID,
-      }),
-      headers: {
-        ...this.headers,
-      },
-    });
-
-    return res.status;
-  }
 }
