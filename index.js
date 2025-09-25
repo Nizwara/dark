@@ -12,12 +12,13 @@ let cachedPrxList = [];
 
 const horse = "dHJvamFu";
 const flash = "dmxlc3M=";
+const vmess = "dm1lc3M=";
 const v2 = "djJyYXk=";
 const neko = "Y2xhc2g=";
 
 const APP_DOMAIN = `${serviceName}.${rootDomain}`;
 const PORTS = [443, 80];
-const PROTOCOLS = [atob(horse), atob(flash), "ss"];
+const PROTOCOLS = [atob(horse), atob(flash), atob(vmess), "ss"];
 const KV_PRX_URL = "https://raw.githubusercontent.com/Nizwara/dark/refs/heads/main/kvProxyList.json";
 const PRX_BANK_URL = "https://raw.githubusercontent.com/Nizwara/dark/refs/heads/main/proxyList.txt";
 const NAMAWEB = 'DARK-SYSTEM'
@@ -188,7 +189,7 @@ async function getAllConfig(request) {
             const CHECK_API = `https://${url.hostname}/geo-ip?ip=`;
             const healthCheckUrl = `${CHECK_API}${ipPort}`;
 
-            let vlessUrl, trojanUrl, ssUrl;
+            let vlessUrl, trojanUrl, ssUrl, vmessUrl;
 
             if (selectedConfigType === 'tls') {
                 vlessUrl = new URL(`${atob(flash)}://bug.com`);
@@ -200,7 +201,7 @@ async function getAllConfig(request) {
                 vlessUrl.searchParams.set("encryption", "none");
                 vlessUrl.searchParams.set("type", "ws");
                 vlessUrl.searchParams.set("sni", APP_DOMAIN);
-                vlessUrl.hash = `${baseId + 1} ${getFlagEmoji(prx.country)} ${prx.org}`;
+                vlessUrl.hash = `${getFlagEmoji(prx.country)} ${prx.org}`;
 
                 trojanUrl = new URL(`${atob(horse)}://bug.com`);
                 trojanUrl.port = "443";
@@ -210,7 +211,7 @@ async function getAllConfig(request) {
                 trojanUrl.searchParams.set("host", APP_DOMAIN);
                 trojanUrl.searchParams.set("type", "ws");
                 trojanUrl.searchParams.set("sni", APP_DOMAIN);
-                trojanUrl.hash = `${baseId + 1} ${getFlagEmoji(prx.country)} ${prx.org}`;
+                trojanUrl.hash = `${getFlagEmoji(prx.country)} ${prx.org}`;
 
                 ssUrl = new URL(`ss://${btoa(`none:${uuid}`)}@${APP_DOMAIN}:443`);
                 ssUrl.searchParams.set("encryption", "none");
@@ -230,7 +231,7 @@ async function getAllConfig(request) {
                 vlessUrl.searchParams.set("host", APP_DOMAIN);
                 vlessUrl.searchParams.set("encryption", "none");
                 vlessUrl.searchParams.set("type", "ws");
-                vlessUrl.hash = `${baseId + 1} ${getFlagEmoji(prx.country)} ${prx.org}`;
+                vlessUrl.hash = `${getFlagEmoji(prx.country)} ${prx.org}`;
 
                 trojanUrl = new URL(`${atob(horse)}://bug.com`);
                 trojanUrl.port = "80";
@@ -239,7 +240,7 @@ async function getAllConfig(request) {
                 trojanUrl.searchParams.set("path", `/${prx.prxIP}-${prx.prxPort}`);
                 trojanUrl.searchParams.set("host", APP_DOMAIN);
                 trojanUrl.searchParams.set("type", "ws");
-                trojanUrl.hash = `${baseId + 1} ${getFlagEmoji(prx.country)} ${prx.org}`;
+                trojanUrl.hash = `${getFlagEmoji(prx.country)} ${prx.org}`;
 
                 ssUrl = new URL(`ss://${btoa(`none:${uuid}`)}@${APP_DOMAIN}:80`);
                 ssUrl.searchParams.set("encryption", "none");
@@ -249,6 +250,22 @@ async function getAllConfig(request) {
                 ssUrl.searchParams.set("security", "none");
                 ssUrl.hash = `${prx.org} ${getFlagEmoji(prx.country)}`;
             }
+
+            const vmessConfig = {
+                v: "2",
+                ps: `${getFlagEmoji(prx.country)} ${prx.org}`,
+                add: APP_DOMAIN,
+                port: selectedConfigType === 'tls' ? "443" : "80",
+                id: uuid,
+                aid: 0,
+                net: "ws",
+                type: "none",
+                host: APP_DOMAIN,
+                path: `/${prx.prxIP}-${prx.prxPort}`,
+                tls: selectedConfigType === 'tls' ? "tls" : "",
+                sni: selectedConfigType === 'tls' ? APP_DOMAIN : ""
+            };
+            vmessUrl = "vmess://" + btoa(JSON.stringify(vmessConfig));
 
             return `
                <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
@@ -281,9 +298,7 @@ async function getAllConfig(request) {
       <div class="grid grid-cols-2 gap-2 mt-4 text-sm">
         <button class="w-full p-2 rounded-md text-xs font-semibold text-black dark:text-white bg-yellow-400 hover:bg-yellow-500 dark:bg-indigo-500 dark:hover:bg-indigo-600 transition-colors duration-200" onclick="copyConfig('${vlessUrl.toString()}')">VLESS ${selectedConfigType === 'tls' ? 'TLS' : 'NTLS'}</button>
         <button class="w-full p-2 rounded-md text-xs font-semibold text-black dark:text-white bg-yellow-400 hover:bg-yellow-500 dark:bg-indigo-500 dark:hover:bg-indigo-600 transition-colors duration-200" onclick="copyConfig('${trojanUrl.toString()}')">TROJAN ${selectedConfigType === 'tls' ? 'TLS' : 'NTLS'}</button>
-      </div>
-
-      <div class="mt-2">
+        <button class="w-full p-2 rounded-md text-xs font-semibold text-black dark:text-white bg-yellow-400 hover:bg-yellow-500 dark:bg-indigo-500 dark:hover:bg-indigo-600 transition-colors duration-200" onclick="copyConfig('${vmessUrl}')">VMESS ${selectedConfigType === 'tls' ? 'TLS' : 'NTLS'}</button>
         <button class="w-full p-2 rounded-md text-xs font-semibold text-black dark:text-white bg-yellow-400 hover:bg-yellow-500 dark:bg-indigo-500 dark:hover:bg-indigo-600 transition-colors duration-200" onclick="copyConfig('${ssUrl.toString()}')">SHADOWSOCKS ${selectedConfigType === 'tls' ? 'TLS' : 'NTLS'}</button>
       </div>
     </div>
@@ -351,32 +366,6 @@ async function getAllConfig(request) {
 
       // Local variable
       let rawConfig = "";
-
-      function getDomainList() {
-        if (isDomainListFetched) return;
-        isDomainListFetched = true;
-
-        windowInfoContainer.innerText = "Fetching data...";
-
-        const url = "/api/v1/domains/get";
-        const res = fetch(url).then(async (res) => {
-          const domainListContainer = document.getElementById("container-domains");
-          domainListContainer.innerHTML = "";
-
-          if (res.status == 200) {
-            windowInfoContainer.innerText = "Done!";
-            const respJson = await res.json();
-            for (const domain of respJson) {
-              const domainElement = document.createElement("p");
-              domainElement.classList.add("w-full", "bg-amber-400", "rounded-md");
-              domainElement.innerText = domain;
-              domainListContainer.appendChild(domainElement);
-            }
-          } else {
-            windowInfoContainer.innerText = "Failed!";
-          }
-        });
-      }
 
       function checkRegion() {
         for (let i = 0; ; i++) {
@@ -711,47 +700,6 @@ async function getAllConfig(request) {
     </div>
 </div>
 
-    <div
-    id="wildcards-window"
-    class="fixed hidden top-0 right-0 w-full h-full flex justify-center items-center bg-gray-700"
->
-    <div class="w-[75%] h-[30%] flex flex-col gap-1 p-1 text-center rounded-md">
-        <div class="basis-1/6 w-full h-full rounded-md">
-            <div class="flex w-full h-full gap-1 justify-between">
-                <input
-                    id="new-domain-input"
-                    type="text"
-                    placeholder="Input wildcard"
-                    class="basis-11/12 w-full h-full px-6 rounded-md focus:outline-0"
-                />
-                <button
-                    onclick="registerDomain()"
-                    class="p-2 rounded-full bg-amber-400 flex justify-center items-center"
-                >
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 24 24"
-                        fill="currentColor"
-                        class="size-6"
-                    >
-                        <path
-                            fill-rule="evenodd"
-                            d="M16.72 7.72a.75.75 0 0 1 1.06 0l3.75 3.75a.75.75 0 0 1 0 1.06l-3.75 3.75a.75.75 0 1 1-1.06-1.06l2.47-2.47H3a.75.75 0 0 1 0-1.5h16.19l-2.47-2.47a.75.75 0 0 1 0-1.06Z"
-                            clip-rule="evenodd"
-                        ></path>
-                    </svg>
-                </button>
-            </div>
-        </div>
-        <div class="basis-5/6 w-full h-full rounded-md">
-            <div
-                id="container-domains"
-                class="w-full h-full rounded-md flex flex-col gap-1 overflow-scroll scrollbar-hide"
-            ></div>
-        </div>
-    </div>
-</div>
-
     <footer>
     <div class="fixed bottom-4 right-4 flex flex-col items-end gap-3 z-50">
         <button onclick="toggleDropdown()" class="transition-colors rounded-full p-2 block text-white shadow-lg transform hover:scale-105 bg-blue-500 hover:bg-blue-600">
@@ -782,12 +730,6 @@ async function getAllConfig(request) {
                 </button>
             </a>
 
-            <button onclick="toggleWildcardsWindow()" class="bg-indigo-500 hover:bg-indigo-600 rounded-full border-2 border-gray-900 p-2 transition-colors duration-200">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 9V4.5M9 9H4.5M9 9 3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5m0-4.5 5.25 5.25" />
-                </svg>
-            </button>
-
             <button onclick="toggleDarkMode()" class="bg-amber-500 hover:bg-amber-600 rounded-full border-2 border-gray-900 p-2 transition-colors duration-200">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" />
@@ -798,61 +740,12 @@ async function getAllConfig(request) {
 </footer>
 
     <script>
-        function registerDomain() {
-            const domainInputElement = document.getElementById("new-domain-input");
-            const registerButton = domainInputElement.nextElementSibling; // Get the button
-            const rawDomain = domainInputElement.value.toLowerCase();
-            const domain = rawDomain + "." + rootDomain;
-
-            if (!rawDomain || rawDomain.includes(' ')) {
-                showToast("Invalid input! ❌");
-                return;
-            }
-
-            // Disable button and input
-            domainInputElement.disabled = true;
-            registerButton.disabled = true;
-            showToast("Processing... ⏳");
-
-            const url = "/api/v1/domains/put?domain=" + domain;
-            fetch(url, { method: 'PUT' }).then((res) => {
-                if (res.status == 200) {
-                    showToast("Success! ✅");
-                    domainInputElement.value = "";
-                    isDomainListFetched = false;
-                    getDomainList();
-                } else {
-                    if (res.status == 409) {
-                        showToast("Domain already exists! ⚠️");
-                    } else {
-                        showToast("Error: " + res.status + " ❌");
-                    }
-                }
-            }).catch(err => {
-                showToast("An error occurred. ❌");
-                console.error(err);
-            }).finally(() => {
-                // Re-enable button and input
-                domainInputElement.disabled = false;
-                registerButton.disabled = false;
-            });
-        }
-
         document.addEventListener('DOMContentLoaded', () => {
             const savedTheme = localStorage.getItem('theme');
             if (savedTheme === 'light') {
                 document.body.classList.add('light-mode');
             }
         });
-
-        function toggleWildcardsWindow() {
-            const wildcardsWindow = document.getElementById("wildcards-window");
-            wildcardsWindow.classList.toggle("hidden");
-            if (!wildcardsWindow.classList.contains("hidden")) {
-                // Panggil fungsi getDomainList() saat jendela dibuka
-                getDomainList();
-            }
-        }
 
         function toggleDarkMode() {
             const body = document.body;
@@ -879,17 +772,6 @@ async function getAllConfig(request) {
 
 export default {
   async fetch(request, env, ctx) {
-    // Handle CORS preflight requests
-    if (request.method === "OPTIONS") {
-      return new Response(null, {
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Methods": "GET, HEAD, POST, PUT, OPTIONS",
-          "Access-Control-Allow-Headers": "*",
-        },
-      });
-    }
-
     try {
       const url = new URL(request.url);
       const myurl = "geovpn.vercel.app";
@@ -975,35 +857,7 @@ export default {
       } else if (url.pathname.startsWith("/api/v1")) {
         const apiPath = url.pathname.replace("/api/v1", "");
 
-        if (apiPath.startsWith("/domains")) {
-          if (!isApiReady) {
-            return new Response("Api not ready", {
-              status: 500,
-            });
-          }
-
-          const wildcardApiPath = apiPath.replace("/domains", "");
-          const cloudflareApi = new CloudflareApi();
-
-          if (wildcardApiPath == "/get") {
-            const domains = await cloudflareApi.getDomainList();
-            return new Response(JSON.stringify(domains), {
-              headers: {
-                ...CORS_HEADER_OPTIONS,
-              },
-            });
-          } else if (wildcardApiPath == "/put") {
-            const domain = url.searchParams.get("domain");
-            const register = await cloudflareApi.registerDomain(domain);
-
-            return new Response(register.toString(), {
-              status: register,
-              headers: {
-                ...CORS_HEADER_OPTIONS,
-              },
-            });
-          }
-        } else if (apiPath.startsWith("/sub")) {
+        if (apiPath.startsWith("/sub")) {
           const filterCC = url.searchParams.get("cc")?.split(",") || [];
           const filterPort = url.searchParams.get("port")?.split(",") || PORTS;
           const filterVPN = url.searchParams.get("vpn")?.split(",") || PROTOCOLS;
@@ -1042,7 +896,7 @@ export default {
                   uri.searchParams.set("security", port == 443 ? "tls" : "none");
                   uri.searchParams.set("sni", port == 443 ? APP_DOMAIN : "");
                   uri.searchParams.set("path", `/${prx.prxIP}-${prx.prxPort}`);
-                  uri.hash = `${result.length + 1} ${getFlagEmoji(prx.country)} ${prx.org} VLESS/WS/${port == 443 ? "TLS" : "NTLS"} [${serviceName}]`;
+                  uri.hash = `${getFlagEmoji(prx.country)} ${prx.org} VLESS/WS/${port == 443 ? "TLS" : "NTLS"}`;
                 } else if (protocol == atob(horse)) { // Trojan
                   uri.searchParams.set("encryption", "none");
                   uri.searchParams.set("type", "ws");
@@ -1051,14 +905,31 @@ export default {
                   uri.searchParams.set("security", port == 443 ? "tls" : "none");
                   uri.searchParams.set("sni", port == 443 ? APP_DOMAIN : "");
                   uri.searchParams.set("path", `/${prx.prxIP}-${prx.prxPort}`);
-                  uri.hash = `${result.length + 1} ${getFlagEmoji(prx.country)} ${prx.org} Trojan/WS/${port == 443 ? "TLS" : "NTLS"} [${serviceName}]`;
+                  uri.hash = `${getFlagEmoji(prx.country)} ${prx.org} Trojan/WS/${port == 443 ? "TLS" : "NTLS"}`;
+                } else if (protocol == atob(vmess)) { // VMess
+                    const vmessConfig = {
+                        v: "2",
+                        ps: `${getFlagEmoji(prx.country)} ${prx.org} VMess/WS/${port == 443 ? "TLS" : "NTLS"}`,
+                        add: APP_DOMAIN,
+                        port: port.toString(),
+                        id: uuid,
+                        aid: 0,
+                        net: "ws",
+                        type: "none",
+                        host: APP_DOMAIN,
+                        path: `/${prx.prxIP}-${prx.prxPort}`,
+                        tls: port == 443 ? "tls" : "",
+                        sni: port == 443 ? APP_DOMAIN : ""
+                    };
+                    result.push("vmess://" + btoa(JSON.stringify(vmessConfig)));
+                    continue;
                 } else if (protocol == "ss") { // Shadowsocks
                   uri.username = btoa(`none:${uuid}`);
                   uri.searchParams.set(
                     "plugin",
                     `${atob(v2)}-plugin${port == 80 ? "" : ";tls"};mux=0;mode=websocket;path=/${prx.prxIP}-${prx.prxPort};host=${APP_DOMAIN}`
                   );
-                  uri.hash = `${result.length + 1} ${getFlagEmoji(prx.country)} ${prx.org} Shadowsocks/WS/${port == 443 ? "TLS" : "NTLS"} [${serviceName}]`;
+                  uri.hash = `${getFlagEmoji(prx.country)} ${prx.org} Shadowsocks/WS/${port == 443 ? "TLS" : "NTLS"}`;
                 }
 
                 result.push(uri.toString());
@@ -1177,6 +1048,8 @@ async function websocketHandler(request) {
             protocolHeader = readHorseHeader(chunk);
           } else if (protocol === atob(flash)) {
             protocolHeader = readFlashHeader(chunk);
+          } else if (protocol === atob(vmess)) {
+            protocolHeader = readVmessHeader(chunk);
           } else if (protocol === "ss") {
             protocolHeader = readSsHeader(chunk);
           } else {
@@ -1252,6 +1125,10 @@ async function protocolSniffer(buffer) {
   const flashDelimiter = new Uint8Array(buffer.slice(1, 17));
   if (arrayBufferToHex(flashDelimiter).match(/^[0-9a-f]{8}[0-9a-f]{4}4[0-9a-f]{3}[89ab][0-9a-f]{3}[0-9a-f]{12}$/i)) {
     return atob(flash);
+  }
+
+  if (arrayBufferToHex(new Uint8Array(buffer.slice(0, 1))).match(/0[1-9a-f]/)) {
+      return atob(vmess);
   }
 
   return "ss";
@@ -1381,6 +1258,63 @@ function makeReadableWebSocketStream(webSocketServer, earlyDataHeader, log) {
   });
 
   return stream;
+}
+
+function readVmessHeader(vmessBuffer) {
+    const view = new DataView(vmessBuffer);
+    const version = view.getUint8(0);
+    if (version !== 1) {
+        return { hasError: true, message: `Invalid VMess version: ${version}` };
+    }
+
+    // Skip UUID (16 bytes), alterId (2 bytes), security (1 byte)
+    let offset = 19;
+
+    const cmd = view.getUint8(offset);
+    const isUDP = (cmd & 0x02) === 0x02;
+    offset += 1;
+
+    const port = view.getUint16(offset);
+    offset += 2;
+
+    const addressType = view.getUint8(offset);
+    offset += 1;
+
+    let address = "";
+    let addressLength = 0;
+
+    switch (addressType) {
+        case 1: // IPv4
+            addressLength = 4;
+            address = new Uint8Array(vmessBuffer.slice(offset, offset + addressLength)).join('.');
+            break;
+        case 2: // FQDN
+            addressLength = view.getUint8(offset);
+            offset += 1;
+            address = new TextDecoder().decode(vmessBuffer.slice(offset, offset + addressLength));
+            break;
+        case 3: // IPv6
+            addressLength = 16;
+            const ipv6 = [];
+            for (let i = 0; i < 8; i++) {
+                ipv6.push(view.getUint16(offset + i * 2).toString(16));
+            }
+            address = ipv6.join(':');
+            break;
+        default:
+            return { hasError: true, message: `Invalid address type: ${addressType}` };
+    }
+    offset += addressLength;
+
+    return {
+        hasError: false,
+        addressRemote: address,
+        portRemote: port,
+        rawDataIndex: offset,
+        rawClientData: vmessBuffer.slice(offset),
+        isUDP: isUDP,
+        version: new Uint8Array([1, 0]),
+    };
 }
 
 function readSsHeader(ssBuffer) {
@@ -1671,82 +1605,4 @@ function getFlagEmoji(isoCode) {
     .split("")
     .map((char) => 127397 + char.charCodeAt(0));
   return String.fromCodePoint(...codePoints);
-}
-
-class CloudflareApi {
-  constructor() {
-    this.bearer = `Bearer ${apiKey}`;
-    this.accountID = accountID;
-    this.zoneID = zoneID;
-    this.apiEmail = apiEmail;
-    this.apiKey = apiKey;
-
-    this.headers = {
-      Authorization: this.bearer,
-      "X-Auth-Email": this.apiEmail,
-      "X-Auth-Key": this.apiKey,
-    };
-  }
-
-  async getDomainList() {
-    const url = `https://api.cloudflare.com/client/v4/accounts/${this.accountID}/workers/domains`;
-    const res = await fetch(url, {
-      headers: {
-        ...this.headers,
-      },
-    });
-
-    if (res.status == 200) {
-      const respJson = await res.json();
-
-      return respJson.result.filter((data) => data.service == serviceName).map((data) => data.hostname);
-    }
-
-    return [];
-  }
-
-  async registerDomain(domain) {
-    domain = domain.toLowerCase();
-    const registeredDomains = await this.getDomainList();
-
-    if (!domain.endsWith(rootDomain)) return 400;
-    if (registeredDomains.includes(domain)) return 409;
-
-    try {
-      const domainTest = await fetch(`https://${domain.replaceAll("." + APP_DOMAIN, "")}`);
-      if (domainTest.status == 530) return domainTest.status;
-
-      const badWordsListRes = await fetch(BAD_WORDS_LIST);
-      if (badWordsListRes.status == 200) {
-        const badWordsList = (await badWordsListRes.text()).split("\n").filter(b => b.trim() !== '');
-        const subdomain = domain.replace("." + rootDomain, "");
-        for (const badWord of badWordsList) {
-          if (badWord && new RegExp(`\\b${badWord.toLowerCase()}\\b`).test(subdomain)) {
-            return 403;
-          }
-        }
-      } else {
-        return 403;
-      }
-    } catch (e) {
-      return 400;
-    }
-
-    const url = `https://api.cloudflare.com/client/v4/accounts/${this.accountID}/workers/domains`;
-    const res = await fetch(url, {
-      method: "PUT",
-      body: JSON.stringify({
-        environment: "production",
-        hostname: domain,
-        service: serviceName,
-        zone_id: this.zoneID,
-      }),
-      headers: {
-        ...this.headers,
-        'Content-Type': 'application/json'
-      },
-    });
-
-    return res.status;
-  }
 }
