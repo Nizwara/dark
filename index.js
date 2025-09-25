@@ -879,6 +879,17 @@ async function getAllConfig(request) {
 
 export default {
   async fetch(request, env, ctx) {
+    // Handle CORS preflight requests
+    if (request.method === "OPTIONS") {
+      return new Response(null, {
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Methods": "GET, HEAD, POST, PUT, OPTIONS",
+          "Access-Control-Allow-Headers": "*",
+        },
+      });
+    }
+
     try {
       const url = new URL(request.url);
       const myurl = "geovpn.vercel.app";
