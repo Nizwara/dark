@@ -358,7 +358,7 @@ async function getAllConfig(request) {
 
         windowInfoContainer.innerText = "Fetching data...";
 
-        const url = "https://" + rootDomain + "/api/v1/domains/get";
+        const url = "/api/v1/domains/get";
         const res = fetch(url).then(async (res) => {
           const domainListContainer = document.getElementById("container-domains");
           domainListContainer.innerHTML = "";
@@ -798,7 +798,6 @@ async function getAllConfig(request) {
 </footer>
 
     <script>
-        const rootDomain = "${rootDomain}";
         function registerDomain() {
             const domainInputElement = document.getElementById("new-domain-input");
             const registerButton = domainInputElement.nextElementSibling; // Get the button
@@ -815,8 +814,8 @@ async function getAllConfig(request) {
             registerButton.disabled = true;
             showToast("Processing... ⏳");
 
-            const url = "https://" + rootDomain + "/api/v1/domains/put?domain=" + domain;
-            fetch(url).then((res) => {
+            const url = "/api/v1/domains/put?domain=" + domain;
+            fetch(url, { method: 'PUT' }).then((res) => {
                 if (res.status == 200) {
                     showToast("Success! ✅");
                     domainInputElement.value = "";
