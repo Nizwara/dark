@@ -2,11 +2,6 @@ import { connect } from "cloudflare:sockets";
 
 const rootDomain = "cf.gazz.biz.id"; // Ganti dengan domain utama kalian
 const serviceName = "joh"; // Ganti dengan nama workers kalian
-const apiKey = "421d2f7a2ed8b1ecba678c31594c8bf0ca0bd"; // Ganti dengan Global API key kalian (https://dash.cloudflare.com/profile/api-tokens)
-const apiEmail = "nizwara94@gmail.com"; // Ganti dengan email yang kalian gunakan
-const accountID = "f3fdfe9c25ee08bb194f774ded58736e"; // Ganti dengan Account ID kalian (https://dash.cloudflare.com -> Klik domain yang kalian gunakan)
-const zoneID = "f3258d782a5151c57f45dac127f3bdbd"; // Ganti dengan Zone ID kalian (https://dash.cloudflare.com -> Klik domain yang kalian gunakan)
-let isApiReady = false;
 let prxIP = "";
 let cachedPrxList = [];
 
@@ -813,10 +808,6 @@ export default {
         return new Response(JSON.stringify(data), {
           headers: { "Content-Type": "application/json" },
         });
-      }
-
-      if (apiKey && apiEmail && accountID && zoneID) {
-        isApiReady = true;
       }
 
       if (upgradeHeader === "websocket") {
