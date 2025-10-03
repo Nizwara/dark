@@ -177,7 +177,7 @@ export default {
       }
 
       return new Response(configs);
-    } catch (err) => {
+    } catch (err) {
       return new Response(`An error occurred: ${err.toString()}`, {
         status: 500,
       });
