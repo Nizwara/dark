@@ -629,20 +629,29 @@ async function handleWebRequest(request) {
     const page = parseInt(url.searchParams.get('page')) || 1;
     const searchQuery = url.searchParams.get('search') || '';
     const selectedWildcard = url.searchParams.get('wildcard') || null;
-    const selectedConfigType = url.searchParams.get('configType') || 'tls';
+    const selectedConfigType = url.searchParams.get('configType') || 'tls'; // Ambil nilai 'configType' atau gunakan default 'tls'
     const configsPerPage = 20;
 
     const configs = await fetchConfigs();
     const totalConfigs = configs.length;
 
     let filteredConfigs = configs;
-    if (searchQuery) {
-        const lowerCaseQuery = searchQuery.toLowerCase();
-        filteredConfigs = configs.filter(config =>
-            config.ip.toLowerCase().includes(lowerCaseQuery) ||
-            config.isp.toLowerCase().includes(lowerCaseQuery) ||
-            config.countryCode.toLowerCase().includes(lowerCaseQuery) ||
-            (`${config.ip}:${config.port}`).includes(lowerCaseQuery)
+    if (searchQuery.includes(':')) {
+        // Search by IP:PORT format
+        filteredConfigs = configs.filter((config) =>
+            `${config.ip}:${config.port}`.includes(searchQuery)
+        );
+    } else if (searchQuery.length === 2) {
+        // Search by country code (if it's two characters)
+        filteredConfigs = configs.filter((config) =>
+            config.countryCode.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+    } else if (searchQuery.length > 2) {
+        // Search by IP, ISP, or country code
+        filteredConfigs = configs.filter((config) =>
+            config.ip.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            (`${config.ip}:${config.port}`).includes(searchQuery.toLowerCase()) ||
+            config.isp.toLowerCase().includes(searchQuery.toLowerCase())
         );
     }
 
@@ -654,80 +663,62 @@ async function handleWebRequest(request) {
 
     const configType = url.searchParams.get('configType') || 'tls';
 
-    const cardElements = visibleConfigs
+    const tableRows = visibleConfigs
       .map((config) => {
         const uuid = generateUUIDv4();
         const wildcard = selectedWildcard || hostName;
         const modifiedHostName = selectedWildcard ? `${selectedWildcard}.${hostName}` : hostName;
         const ipPort = `${config.ip}:${config.port}`;
-        const healthCheckUrl = `/geo-ip?ip=${ipPort}`;
-
-        let vlessUrl, trojanUrl, ssUrl;
 
         if (configType === 'tls') {
-            vlessUrl = `vless://${uuid}@${wildcard}:443?encryption=none&security=tls&sni=${modifiedHostName}&fp=randomized&type=ws&host=${modifiedHostName}&path=${encodeURIComponent(config.path.toUpperCase())}#(${config.countryCode})%20${config.isp.replace(/\s/g,'%20')}${getFlagEmoji(config.countryCode)}`;
-            trojanUrl = `trojan://${uuid}@${wildcard}:443?encryption=none&security=tls&sni=${modifiedHostName}&fp=randomized&type=ws&host=${modifiedHostName}&path=${encodeURIComponent(config.path.toUpperCase())}#(${config.countryCode})%20${config.isp.replace(/\s/g,'%20')}${getFlagEmoji(config.countryCode)}`;
-            ssUrl = `ss://${btoa(`none:${uuid}`)}@${wildcard}:443?encryption=none&type=ws&host=${modifiedHostName}&path=${encodeURIComponent(config.path.toUpperCase())}&security=tls&sni=${modifiedHostName}#(${config.countryCode})%20${config.isp.replace(/\s/g,'%20')}${getFlagEmoji(config.countryCode)}`;
-        } else { // non-tls
-            vlessUrl = `vless://${uuid}@${wildcard}:80?path=${encodeURIComponent(config.path.toUpperCase())}&security=none&encryption=none&host=${modifiedHostName}&fp=randomized&type=ws&sni=${modifiedHostName}#(${config.countryCode})%20${config.isp.replace(/\s/g,'%20')}${getFlagEmoji(config.countryCode)}`;
-            trojanUrl = `trojan://${uuid}@${wildcard}:80?path=${encodeURIComponent(config.path.toUpperCase())}&security=none&encryption=none&host=${modifiedHostName}&fp=randomized&type=ws&sni=${modifiedHostName}#(${config.countryCode})%20${config.isp.replace(/\s/g,'%20')}${getFlagEmoji(config.countryCode)}`;
-            ssUrl = `ss://${btoa(`none:${uuid}`)}@${wildcard}:80?encryption=none&type=ws&host=${modifiedHostName}&path=${encodeURIComponent(config.path.toUpperCase())}&security=none&sni=${modifiedHostName}#(${config.countryCode})%20${config.isp.replace(/\s/g,'%20')}${getFlagEmoji(config.countryCode)}`;
+            return `
+                <tr class="config-row">
+                    <td class="ip-cell">${ipPort}</td>
+                    <td class="status-cell" id="status-${ipPort}">Checking...</td>
+                    <td class="country-cell">${config.countryCode} ${getFlagEmoji(config.countryCode)}</td>
+                    <td class="isp-cell">${config.isp}</td>
+                    <td class="path-cell">${config.path}</td>
+                    <td class="button-cell">
+                        <button class="copy-btn vless" onclick="copy('${`vless://${uuid}@${wildcard}:443?encryption=none&security=tls&sni=${modifiedHostName}&fp=randomized&type=ws&host=${modifiedHostName}&path=${encodeURIComponent(config.path.toUpperCase())}#(${config.countryCode})%20${config.isp.replace(/\s/g,'%20')}${getFlagEmoji(config.countryCode)}`}')">
+                            <span class="btn-icon">📋</span> VLESS
+                        </button>
+                    </td>
+                    <td class="button-cell">
+                        <button class="copy-btn trojan" onclick="copy('${`trojan://${uuid}@${wildcard}:443?encryption=none&security=tls&sni=${modifiedHostName}&fp=randomized&type=ws&host=${modifiedHostName}&path=${encodeURIComponent(config.path.toUpperCase())}#(${config.countryCode})%20${config.isp.replace(/\s/g,'%20')}${getFlagEmoji(config.countryCode)}`}')">
+                            <span class="btn-icon">📋</span> TROJAN
+                        </button>
+                    </td>
+                    <td class="button-cell">
+                        <button class="copy-btn shadowsocks" onclick="copy('${`ss://${btoa(`none:${uuid}`)}%3D@${wildcard}:443?encryption=none&type=ws&host=${modifiedHostName}&path=${encodeURIComponent(config.path.toUpperCase())}&security=tls&sni=${modifiedHostName}#(${config.countryCode})%20${config.isp.replace(/\s/g,'%20')}${getFlagEmoji(config.countryCode)}`}')">
+                            <span class="btn-icon">📋</span> Shadowsocks
+                        </button>
+                    </td>
+                </tr>`;
+        } else {
+            return `
+                <tr class="config-row">
+                    <td class="ip-cell">${ipPort}</td>
+                    <td class="status-cell" id="status-${ipPort}">Checking...</td>
+                    <td class="country-cell">${config.countryCode} ${getFlagEmoji(config.countryCode)}</td>
+                    <td class="isp-cell">${config.isp}</td>
+                    <td class="path-cell">${config.path}</td>
+                    <td class="button-cell">
+                        <button class="copy-btn vless" onclick="copy('${`vless://${uuid}@${wildcard}:80?path=${encodeURIComponent(config.path.toUpperCase())}&security=none&encryption=none&host=${modifiedHostName}&fp=randomized&type=ws&sni=${modifiedHostName}#(${config.countryCode})%20${config.isp.replace(/\s/g,'%20')}${getFlagEmoji(config.countryCode)}`}')">
+                            <span class="btn-icon">📋</span> VLESS
+                        </button>
+                    </td>
+                    <td class="button-cell">
+                        <button class="copy-btn trojan" onclick="copy('${`trojan://${uuid}@${wildcard}:80?path=${encodeURIComponent(config.path.toUpperCase())}&security=none&encryption=none&host=${modifiedHostName}&fp=randomized&type=ws&sni=${modifiedHostName}#(${config.countryCode})%20${config.isp.replace(/\s/g,'%20')}${getFlagEmoji(config.countryCode)}`}')">
+                            <span class="btn-icon">📋</span> TROJAN
+                        </button>
+                    </td>
+                    <td class="button-cell">
+                        <button class="copy-btn shadowsocks" onclick="copy('${`ss://${btoa(`none:${uuid}`)}%3D@${wildcard}:80?encryption=none&type=ws&host=${modifiedHostName}&path=${encodeURIComponent(config.path.toUpperCase())}&security=none&sni=${modifiedHostName}#(${config.countryCode})%20${config.isp.replace(/\s/g,'%20')}${getFlagEmoji(config.countryCode)}`}')">
+                            <span class="btn-icon">📋</span> Shadowsocks
+                        </button>
+                    </td>
+                </tr>`;
         }
-
-        return `
-            <div class="lozad scale-95 mb-4 p-6 bg-blue-300/30 dark:bg-slate-800 rounded-lg shadow-lg border border-white/20 transition-all duration-300 hover:scale-105 backdrop-blur-md flex flex-col">
-                <div class="flex justify-between items-center">
-                  <span class="flex items-center">
-                    <span class="h-2 w-2 rounded-full bg-green-500 mr-2 animate-pulse"></span>
-                    <span class="proxy-status font-bold" id="status-${ipPort}">
-                      <span class="text-sm">CHECKING...</span>
-                    </span>
-                  </span>
-                  <span class="flex items-center">
-                    <div class="rounded-full overflow-hidden border-4 border-white dark:border-slate-800">
-                      <img width="40" src="https://hatscripts.github.io/circle-flags/flags/${config.countryCode.toLowerCase()}.svg" class="flag-spin" />
-                    </div>
-                  </span>
-                </div>
-                <div class="flex-grow mt-4 py-4 px-4 rounded-lg bg-blue-200/20 dark:bg-slate-700/50">
-                  <h5 class="font-bold text-lg text-slate-800 dark:text-slate-100 mb-1 overflow-x-scroll scrollbar-hide text-nowrap">${config.isp}</h5>
-                  <div class="text-black dark:text-white text-sm">
-                    <p>IP: ${config.ip}</p>
-                    <p>Port: ${config.port}</p>
-                  </div>
-                  <div class="grid grid-cols-2 gap-2 mt-4 text-sm">
-                    <button class="w-full p-2 rounded-md text-xs font-semibold text-black dark:text-white bg-yellow-400 hover:bg-yellow-500 dark:bg-indigo-500 dark:hover:bg-indigo-600 transition-colors duration-200" onclick="copy('${vlessUrl}')">VLESS ${selectedConfigType === 'tls' ? 'TLS' : 'NTLS'}</button>
-                    <button class="w-full p-2 rounded-md text-xs font-semibold text-black dark:text-white bg-yellow-400 hover:bg-yellow-500 dark:bg-indigo-500 dark:hover:bg-indigo-600 transition-colors duration-200" onclick="copy('${trojanUrl}')">TROJAN ${selectedConfigType === 'tls' ? 'TLS' : 'NTLS'}</button>
-                  </div>
-                  <div class="mt-2">
-                    <button class="w-full p-2 rounded-md text-xs font-semibold text-black dark:text-white bg-yellow-400 hover:bg-yellow-500 dark:bg-indigo-500 dark:hover:bg-indigo-600 transition-colors duration-200" onclick="copy('${ssUrl}')">SHADOWSOCKS ${selectedConfigType === 'tls' ? 'TLS' : 'NTLS'}</button>
-                  </div>
-                </div>
-            </div>
-            <script>
-                fetch('${healthCheckUrl}')
-                    .then(response => response.json())
-                    .then(data => {
-                        const statusElement = document.getElementById('status-' + '${ipPort}');
-                        const status = data.status || 'UNKNOWN';
-                        let delay = parseFloat(data.delay) || 'N/A';
-                        if (!isNaN(delay)) {
-                            delay = Math.round(delay);
-                        }
-                        if (status === 'ACTIVE') {
-                            statusElement.innerHTML = '<span class="text-green-500 font-bold">ACTIVE</span> <span class="text-xs font-normal text-amber-400">(' + delay + 'ms)</span>';
-                        } else if (status === 'DEAD') {
-                            statusElement.innerHTML = '<span class="text-red-500 font-bold">DEAD</span>';
-                        } else {
-                            statusElement.innerHTML = '<span class="text-cyan-500 font-bold">UNKNOWN</span>';
-                        }
-                    })
-                    .catch(error => {
-                        const statusElement = document.getElementById('status-' + '${ipPort}');
-                        statusElement.innerHTML = '<span class="text-red-500 font-bold">ERROR</span>';
-                    });
-            </script>
-        `;
       })
       .join('');
 
@@ -754,26 +745,284 @@ async function handleWebRequest(request) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${namaWeb}</title>
+    <title>KILLER VPN</title>
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/lozad/dist/lozad.min.js"></script>
     <style>
-      body {
+      :root {
+        --primary: #00ff88;
+        --secondary: #00ffff;
+        --accent: #ff00ff;
+        --dark: #080c14;
+        --darker: #040608;
+        --light: #e0ffff;
+        --card-bg: rgba(8, 12, 20, 0.95);
+        --glow: 0 0 20px rgba(0, 255, 136, 0.3);
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
         font-family: 'Space Grotesk', sans-serif;
-        background-color: #1a202c;
-        color: #e2e8f0;
       }
-      .font-rajdhani {
+
+      body {
+        background: var(--darker);
+        color: var(--light);
+        min-height: 85vh;
+        background-image:
+          radial-gradient(circle at 0% 0%, rgba(0, 255, 136, 0.1) 0, transparent 50%),
+          radial-gradient(circle at 100% 100%, rgba(0, 255, 255, 0.1) 0, transparent 50%),
+          url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%2300ff88' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+      }
+
+      .wildcard-dropdown {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 0.5rem;
+        margin: 0.5rem auto;
+      }
+
+      select {
+        width: 100%;
+        max-width: 200px; /* Lebar box lebih kecil */
+        padding: 0.4rem 0.6rem; /* Sesuaikan padding */
+        font-size: 0.8rem; /* Ukuran teks lebih kecil */
+        color: var(--light);
+        background: rgba(0, 255, 136, 0.05);
+        border: 2px solid rgba(0, 255, 136, 0.3);
+        border-radius: 10px;
+        box-shadow: var(--glow);
+        outline: none;
         font-family: 'Rajdhani', sans-serif;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        appearance: none; /* Hilangkan panah default */
+        background-image: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%23e0ffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"%3E%3Cpath d="M6 9l6 6 6-6"%3E%3C/path%3E%3C/svg%3E');
+        background-position: right 10px center;
+        background-repeat: no-repeat;
+        background-size: 1rem;
+        transition: all 0.3s ease;
       }
-      .glass-container {
-        background-color: rgba(255, 255, 255, 0.1);
+
+      select:hover {
+        border-color: var(--primary);
+        box-shadow: 0 0 20px rgba(0, 255, 136, 0.2);
+      }
+
+      select:focus {
+        border-color: var(--secondary);
+        background: rgba(0, 255, 136, 0.1);
+        box-shadow: 0 0 20px var(--secondary);
+      }
+
+      .button-style {
+        padding: 0.6rem 1rem; /* Ukuran padding */
+        font-family: 'Rajdhani', sans-serif; /* Font */
+        font-weight: 600; /* Ketebalan font */
+        font-size: 0.6rem; /* Ukuran font */
+        color: var(--dark); /* Warna teks */
+        background: var(--primary); /* Warna background */
+        border: none; /* Hilangkan border */
+        border-radius: 12px; /* Radius untuk efek bulat */
+        cursor: pointer; /* Ubah kursor saat hover */
+        transition: all 0.3s ease; /* Efek transisi */
+        text-transform: uppercase; /* Teks kapitalisasi */
+        letter-spacing: 1px; /* Jarak antar huruf */
+        position: relative; /* Relatif untuk animasi */
+        overflow: hidden; /* Sembunyikan elemen overflow */
+        display: flex; /* Flexbox */
+        align-items: center; /* Ratakan secara vertikal */
+        justify-content: center; /* Ratakan secara horizontal */
+        gap: 0.5rem; /* Jarak antar elemen */
+      }
+
+      .button-style::before {
+        content: ''; /* Pseudo-element */
+        position: absolute; /* Posisi absolut */
+        top: 0;
+        left: -100%; /* Mulai dari luar */
+        width: 100%; /* Lebar penuh */
+        height: 100%; /* Tinggi penuh */
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 255, 255, 0.2),
+          transparent
+        ); /* Efek gradient */
+        transition: 0.5s; /* Durasi transisi */
+      }
+
+      .button-style:hover::before {
+        left: 100%; /* Gerakkan gradient ke kanan */
+       }
+
+      .button-style:hover {
+        transform: translateY(-2px); /* Efek hover */
+        box-shadow: 0 5px 15px rgba(0, 255, 136, 0.3); /* Bayangan */
+      }
+
+      .button-style:active {
+        transform: translateY(1px); /* Efek klik */
+        box-shadow: 0 3px 10px rgba(0, 255, 136, 0.2); /* Reduksi bayangan */
+      }
+
+      .quantum-container {
+        max-width: 1200px;
+        margin: 2rem auto;
+        padding: 2rem;
+        perspective: 1000px;
+      }
+
+      .quantum-card {
+        max-width: 100%;
+        background: var(--card-bg);
         backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        border: 1px solid rgba(0, 255, 136, 0.2);
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: var(--glow);
+        transform-style: preserve-3d;
+        animation: cardFloat 6s ease-in-out infinite;
       }
+
+      @keyframes cardFloat {
+        0%, 100% { transform: translateY(0) rotateX(0); }
+        50% { transform: translateY(-10px) rotateX(2deg); }
+      }
+
+      .quantum-title {
+        font-family: 'Rajdhani', sans-serif;
+        font-size: 4rem;
+        font-weight: 700;
+        text-align: center;
+        margin-top: 1rem;
+        margin-bottom: 2rem;
+        background: linear-gradient(45deg, var(--primary), var(--secondary));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-shadow: 0 0 30px rgba(0, 255, 136, 0.5);
+        position: relative;
+        animation: titlePulse 3s ease-in-out infinite;
+      }
+
+      @keyframes titlePulse {
+        0%, 100% { transform: scale(1); filter: brightness(1); }
+        50% { transform: scale(1.02); filter: brightness(1.2); }
+      }
+
+      .search-quantum {
+        position: relative;
+        margin-top: 0.6rem;
+        margin-bottom: 0.3rem;
+      }
+
+      #search-bar {
+        width: 100%;
+        padding: 0.6rem 1rem;
+        font-size: 0.6rem;
+        color: var(--light);
+        background: rgba(0, 255, 136, 0.05);
+        border: 2px solid rgba(0, 255, 136, 0.3);
+        border-radius: 15px;
+        transition: all 0.3s ease;
+      }
+
+      #search-bar:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 20px rgba(0, 255, 136, 0.2);
+        background: rgba(0, 255, 136, 0.1);
+      }
+
+      .quantum-table {
+        width: 100%;
+        min-width: 800px;
+        border-collapse: separate;
+        border-spacing: 0 8px;
+      }
+
+      .quantum-table th {
+        background: rgba(0, 255, 136, 0.1);
+        color: var(--primary);
+        padding: 1.2rem;
+        font-family: 'Rajdhani', sans-serif;
+        font-weight: 600;
+        font-size: 1.1rem;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        border-bottom: 2px solid var(--primary);
+        white-space: nowrap;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+      }
+
+      .quantum-table td {
+        padding: 1rem;
+        background: rgba(0, 255, 136, 0.03);
+        border: none;
+        transition: all 0.3s ease;
+      }
+
+      .quantum-table tr {
+        transition: all 0.3s ease;
+      }
+
+      .quantum-table tr:hover td {
+        background: rgba(0, 255, 136, 0.08);
+        transform: scale(1.01);
+        box-shadow: 0 5px 15px rgba(0, 255, 136, 0.1);
+      }
+
+      .copy-btn {
+        padding: 0.8rem 1.5rem;
+        font-family: 'Rajdhani', sans-serif;
+        font-weight: 600;
+        font-size: 0.9rem;
+        color: var(--dark);
+        background: var(--primary);
+        border: none;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        position: relative;
+        overflow: hidden;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+      }
+
+      .copy-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: 0.5s;
+      }
+
+      .copy-btn:hover::before {
+        left: 100%;
+      }
+
+      .copy-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 255, 136, 0.3);
+      }
+
+      .btn-icon {
+        font-size: 1.2rem;
+      }
+
       .quantum-pagination {
         display: flex;
         justify-content: center;
@@ -781,10 +1030,11 @@ async function handleWebRequest(request) {
         margin-top: 2rem;
         flex-wrap: wrap;
       }
+
       .quantum-pagination a {
         padding: 0.8rem 1.5rem;
         background: rgba(0, 255, 136, 0.1);
-        color: #00ff88;
+        color: var(--primary);
         text-decoration: none;
         border-radius: 12px;
         border: 1px solid rgba(0, 255, 136, 0.3);
@@ -794,92 +1044,263 @@ async function handleWebRequest(request) {
         min-width: 45px;
         text-align: center;
       }
+
       .quantum-pagination a:hover,
       .quantum-pagination a.active {
-        background: #00ff88;
-        color: #080c14;
+        background: var(--primary);
+        color: var(--dark);
         transform: translateY(-2px);
         box-shadow: 0 5px 15px rgba(0, 255, 136, 0.2);
       }
-      .toast {
+
+      .quantum-toast {
         position: fixed;
         bottom: 2rem;
-        left: 50%;
-        transform: translateX(-50%) translateY(100%);
-        background-color: rgba(144, 238, 144, 0.7);
-        backdrop-filter: blur(10px) saturate(180%);
-        border: 1px solid rgba(0, 128, 0, 0.3);
-        color: #222;
-        padding: 0.75rem 1.25rem;
-        border-radius: 1rem;
-        font-weight: 500;
+        right: 2rem;
+        padding: 1rem 2rem;
+        background: var(--primary);
+        color: var(--dark);
+        border-radius: 12px;
+        font-family: 'Rajdhani', sans-serif;
+        font-weight: 600;
+        box-shadow: 0 5px 15px rgba(0, 255, 136, 0.3);
+        transform: translateY(100%);
         opacity: 0;
-        transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-        z-index: 100;
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        animation: toastSlide 0.3s forwards;
+        z-index: 1000;
       }
-      .toast.show {
-        transform: translateX(-50%) translateY(0);
-        opacity: 1;
+
+      @keyframes toastSlide {
+        to {
+          transform: translateY(0);
+          opacity: 1;
+        }
+      }
+
+      /* Mobile Responsiveness */
+      @media (max-width: 768px) {
+        .quantum-container {
+          padding: 0.5rem;
+          margin: 0.5rem;
+        }
+
+        .quantum-card {
+          padding: 1rem;
+          margin: 0;
+          width: 100%;
+          border-radius: 10px;
+          max-width: 100%;
+        }
+
+        .quantum-title {
+          font-size: 2rem;
+          margin-bottom: 1rem;
+        }
+
+        #search-bar {
+          padding: 0.6rem 1rem;
+          font-size: 0.6rem;
+        }
+
+        .table-wrapper {
+          margin: 0.5rem 0;
+          padding: 0;
+          border-radius: 10px;
+          max-height: 60vh; /* Restrict the height of the table */
+          overflow-y: auto; /* Allow scrolling within the table */
+          background: rgba(0, 255, 136, 0.02);
+        }
+
+        .quantum-table th,
+        .quantum-table td {
+          padding: 0.8rem 0.5rem;
+          font-size: 0.9rem;
+        }
+
+        .copy-btn {
+          padding: 0.6rem 1rem;
+          font-size: 0.8rem;
+        }
+
+        .quantum-pagination {
+          gap: 0.5rem;
+          flex-wrap: wrap;
+        }
+
+        .quantum-pagination a {
+          padding: 0.5rem 0.7rem;
+          font-size: 0.7rem;
+          min-width: 30px;
+        }
+
+        .quantum-toast {
+          left: 1rem;
+          right: 1rem;
+          bottom: 1rem;
+          text-align: center;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .quantum-card {
+          padding: 0.5rem;
+          max-width: 100%;
+        }
+
+        .quantum-title {
+          font-size: 1.5rem;
+        }
+
+        .table-wrapper {
+          margin: 0.5rem -0.5rem;
+          padding: 0 0.5rem;
+        }
+
+        .quantum-table {
+          font-size: 0.8rem;
+        }
+
+        .copy-btn {
+          padding: 0.5rem 0.8rem;
+          font-size: 0.7rem;
+        }
+      }
+
+      .table-wrapper {
+        width: 100%;
+        max-height: calc(80vh - 200px); /* Atur tinggi maksimal untuk scroll */
+        overflow-y: auto; /* Aktifkan scroll vertikal */
+        -webkit-overflow-scrolling: touch; /* Lancar di perangkat touch */
+        margin: 1rem 0;
+        border-radius: 10px;
+        background: rgba(0, 255, 136, 0.02);
+      }
+
+      .table-wrapper:hover {
+        pointer-events: auto; /* Izinkan scroll pada hover */
+      }
+
+      /* Perbaikan pada scrollbar */
+      .table-wrapper::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+
+      .table-wrapper::-webkit-scrollbar-track {
+        background: rgba(0, 255, 136, 0.1);
+        border-radius: 4px;
+      }
+
+      .table-wrapper::-webkit-scrollbar-thumb {
+        background: var(--primary);
+        border-radius: 4px;
+      }
+
+      .table-wrapper::-webkit-scrollbar-thumb:hover {
+        background: var(--secondary);
       }
     </style>
 </head>
-<body class="bg-gray-900 text-gray-100 min-h-screen p-4">
-    <div class="glass-container mx-auto w-full max-w-7xl rounded-xl p-4 shadow-2xl sm:p-10">
-        <div class="sticky top-0 z-10 w-full rounded-xl py-4 text-center shadow-lg backdrop-blur-md transition-all duration-300 ease-in-out dark:bg-gray-800/10 bg-white/10">
-            <h1 class="font-rajdhani bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 bg-clip-text text-3xl font-extrabold text-transparent md:text-5xl">
-                <a href="${linkTele}" target="_blank" rel="noopener noreferrer">${namaWeb}</a>
+<body>
+    <div class="quantum-container">
+        <div class="quantum-card">
+            <h1 class="quantum-title">
+              <a href="${linkTele}" target="_blank" rel="noopener noreferrer" style="font-family: 'Rajdhani', sans-serif;">
+                ${namaWeb}
+              </a>
             </h1>
-        </div>
-        <br />
-        <div class="mb-6 flex flex-col items-center gap-2 md:flex-row md:justify-between md:gap-4">
-            <div class="flex w-full flex-grow gap-2 md:w-auto">
-                <input
-                    type="text"
-                    id="search-bar"
-                    placeholder="Search by IP, CountryCode, or ISP"
-                    value="${searchQuery}"
-                    class="flex-grow rounded-md border border-gray-600 bg-gray-700 px-3 py-1.5 text-sm text-gray-100 focus:outline-none focus:ring-2 focus:ring-teal-500"
-                />
-                <button id="search-button" class="whitespace-nowrap rounded-md bg-teal-600 px-3 py-1.5 text-sm font-bold text-gray-900 transition-colors hover:bg-teal-700">Search</button>
+
+            <div class="search-quantum" style="display: flex; align-items: center; flex-direction: column;">
+              <div style="display: flex; width: 100%;">
+                <input type="text"
+                  id="search-bar"
+                  placeholder="Search by IP, CountryCode, or ISP"
+                  value="${searchQuery}"
+                  style="flex: 1; padding: 8px;"/>
+                <button id="search-button" class="button-style">Search</button>
+              </div>
+              ${searchQuery
+                ? `<button id="home-button" class="button-style" style="margin-top: 0.4rem;" onclick="goToHomePage('${hostName}')">
+                  Home Page
+                </button>`
+                : ''}
             </div>
-            ${searchQuery ? `<button id="home-button" class="whitespace-nowrap rounded-md bg-gray-600 px-3 py-1.5 text-sm font-bold text-white transition-colors hover:bg-gray-700" onclick="goToHomePage('${hostName}')">Home</button>` : ''}
-            <div class="w-full md:w-auto">
-                <select id="configType" onchange="onConfigTypeChange(event)" class="w-full rounded-md border border-gray-600 bg-gray-700 px-3 py-1.5 text-sm text-gray-100 focus:outline-none focus:ring-2 focus:ring-teal-500">
-                    <option value="tls" ${selectedConfigType === 'tls' ? 'selected' : ''}>TLS</option>
-                    <option value="non-tls" ${selectedConfigType === 'non-tls' ? 'selected' : ''}>NON TLS</option>
-                </select>
+
+            <div class="wildcard-dropdown">
+              <select id="wildcard" name="wildcard" onchange="onWildcardChange(event)">
+                <option value="" ${!selectedWildcard ? 'selected' : ''}>No Wildcard</option>
+                ${wildcards.map(w => `<option value="${w}" ${selectedWildcard === w ? 'selected' : ''}>${w}</option>`).join('')}
+              </select>
+
+              <select id="configType" name="configType" onchange="onConfigTypeChange(event)">
+                <option value="tls" ${selectedConfigType === 'tls' ? 'selected' : ''}>TLS</option>
+                <option value="non-tls" ${selectedConfigType === 'non-tls' ? 'selected' : ''}>NON TLS</option>
+              </select>
             </div>
-        </div>
-        <div class="mb-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">${cardElements}</div>
-        <div class="quantum-pagination">
-            ${prevPage}
-            ${paginationButtons.join('')}
-            ${nextPage}
-        </div>
-        <div style="text-align: center; margin-top: 16px; color: #00ff88; font-family: 'Rajdhani', sans-serif;">
+
+            <div class="table-wrapper">
+              <table class="quantum-table">
+                <thead>
+                    <tr>
+                        <th>IP:PORT</th>
+                        <th>STATUS</th>
+                        <th>COUNTRY</th>
+                        <th>ISP</th>
+                        <th>PATH</th>
+                        <th>VLESS</th>
+                        <th>TROJAN</th>
+                        <th>SHADOWSOCKS</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${tableRows}
+                </tbody>
+              </table>
+            </div>
+
+            <div class="quantum-pagination">
+                ${prevPage}
+                ${paginationButtons.join('')}
+                ${nextPage}
+            </div>
+          <!-- Showing X to Y of Z Proxies message -->
+          <div style="text-align: center; margin-top: 16px; color: var(--primary); font-family: 'Rajdhani', sans-serif;">
             Showing ${startIndex + 1} to ${endIndex} of ${totalFilteredConfigs} Proxies
+          </div>
         </div>
     </div>
+
     <script>
-        window.onload = () => {
-            const observer = lozad(".lozad", {
-                load: function (el) {
-                    el.classList.remove("scale-95");
-                },
-            });
-            observer.observe();
+        const updateURL = (params) => {
+          const url = new URL(window.location.href);
+
+          params.forEach(({ key, value }) => {
+            if (key === 'search' && value) {
+              // Reset ke halaman 1 jika parameter pencarian diperbarui
+              url.searchParams.set('page', '1');
+            }
+            if (value) {
+              url.searchParams.set(key, value);
+            } else {
+              url.searchParams.delete(key);
+            }
+          });
+
+          // Redirect ke URL yang telah diperbarui
+          window.location.href = url.toString();
         };
 
         function goToHomePage(hostName) {
-            const homeURL = 'https://' + hostName + '/web';
-            window.location.href = homeURL;
+          const homeURL = \`https://\${hostName}/web\`;
+          window.location.href = homeURL;
+        }
+
+        function onWildcardChange(event) {
+          updateURL([{ key: 'wildcard', value: event.target.value }]);
         }
 
         function onConfigTypeChange(event) {
-            const url = new URL(window.location.href);
-            url.searchParams.set('configType', event.target.value);
-            window.location.href = url.toString();
+          updateURL([{ key: 'configType', value: event.target.value }]);
         }
 
         function copy(text) {
@@ -887,36 +1308,68 @@ async function handleWebRequest(request) {
                 .then(() => showToast('Configuration copied successfully! 🚀'))
                 .catch(() => showToast('Failed to copy configuration ❌', true));
         }
+
         function showToast(message, isError = false) {
-            const existingToast = document.querySelector('.toast');
-            if (existingToast) {
-                existingToast.remove();
-            }
             const toast = document.createElement('div');
-            toast.className = 'toast';
+            toast.className = 'quantum-toast';
             toast.textContent = message;
+            if (isError) {
+                toast.style.background = '#ff3366';
+            }
             document.body.appendChild(toast);
+
             setTimeout(() => {
-                toast.classList.add('show');
-            }, 10);
-            setTimeout(() => {
-                toast.classList.remove('show');
-                toast.addEventListener('transitionend', () => {
-                    toast.remove();
-                });
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(100%)';
+                setTimeout(() => toast.remove(), 300);
             }, 2000);
         }
-        document.getElementById('search-button').addEventListener('click', () => {
-            const query = document.getElementById('search-bar').value;
-            const url = new URL(window.location.href);
-            url.searchParams.set('search', query);
-            url.searchParams.set('page', '1');
-            window.location.href = url.toString();
-        });
+
+        function executeSearch() {
+          const query = document.getElementById('search-bar').value.trim();
+          if (query) {
+            updateURL([{ key: 'search', value: query }]);
+          } else {
+            alert('Please enter a search term.');
+          }
+        }
+
         document.getElementById('search-bar').addEventListener('keydown', (event) => {
-            if (event.key === 'Enter') {
-                document.getElementById('search-button').click();
-            }
+          if (event.key === 'Enter') {
+            executeSearch();
+          }
+        });
+
+        document.getElementById('search-button').addEventListener('click', executeSearch);
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const configRows = document.querySelectorAll('.config-row');
+            configRows.forEach(row => {
+                const ipPort = row.querySelector('.ip-cell').textContent;
+                const statusCell = row.querySelector("#status-" + ipPort);
+
+                fetch("/geo-ip?ip=" + ipPort)
+                    .then(response => response.json())
+                    .then(data => {
+                        const status = data.status || 'UNKNOWN';
+                        let delay = parseFloat(data.delay) || 'N/A';
+
+                        if (!isNaN(delay)) {
+                            delay = Math.round(delay);
+                        }
+
+                        if (status === 'ACTIVE') {
+                            statusCell.innerHTML = '<span style="color: #00ff88;">ACTIVE</span> (' + delay + 'ms)';
+                        } else if (status === 'DEAD') {
+                            statusCell.innerHTML = '<span style="color: #ff3366;">DEAD</span>';
+                        } else {
+                            statusCell.innerHTML = '<span style="color: #00ffff;">UNKNOWN</span>';
+                        }
+                    })
+                    .catch(() => {
+                        statusCell.innerHTML = '<span style="color: #ff3366;">ERROR</span>';
+                    });
+            });
         });
     </script>
 </body>
