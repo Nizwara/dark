@@ -674,7 +674,7 @@ async function handleWebRequest(request) {
             return `
                 <tr class="config-row">
                     <td class="ip-cell">${ipPort}</td>
-                    <td class="status-cell" id="status-${ipPort}">Checking...</td>
+                    <td class="status-cell" id="status-${ipPort.replace(/:/g, '-')}">Checking...</td>
                     <td class="country-cell">${config.countryCode} ${getFlagEmoji(config.countryCode)}</td>
                     <td class="isp-cell">${config.isp}</td>
                     <td class="path-cell">${config.path}</td>
@@ -698,7 +698,7 @@ async function handleWebRequest(request) {
             return `
                 <tr class="config-row">
                     <td class="ip-cell">${ipPort}</td>
-                    <td class="status-cell" id="status-${ipPort}">Checking...</td>
+                    <td class="status-cell" id="status-${ipPort.replace(/:/g, '-')}">Checking...</td>
                     <td class="country-cell">${config.countryCode} ${getFlagEmoji(config.countryCode)}</td>
                     <td class="isp-cell">${config.isp}</td>
                     <td class="path-cell">${config.path}</td>
@@ -1346,7 +1346,8 @@ async function handleWebRequest(request) {
             const configRows = document.querySelectorAll('.config-row');
             configRows.forEach(row => {
                 const ipPort = row.querySelector('.ip-cell').textContent;
-                const statusCell = row.querySelector("#status-" + ipPort);
+                const statusCellId = "status-" + ipPort.replace(/:/g, '-');
+                const statusCell = row.querySelector("#" + statusCellId);
 
                 fetch("/geo-ip?ip=" + ipPort)
                     .then(response => response.json())
