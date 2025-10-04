@@ -66,8 +66,18 @@ export default {
       // Jalankan pembaruan proxy setiap menit
       ctx.waitUntil(
         (async function periodicUpdate() {
-          await updateProxies();
-          setInterval(updateProxies, 60000); // Setiap 60 detik
+          try {
+            await updateProxies();
+            setInterval(async () => {
+              try {
+                await updateProxies();
+              } catch (e) {
+                console.error("Error during periodic proxy update:", e);
+              }
+            }, 60000); // Setiap 60 detik
+          } catch (e) {
+            console.error("Error during initial proxy update:", e);
+          }
         })()
       );
 
