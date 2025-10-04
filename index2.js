@@ -1,18 +1,29 @@
 import { connect } from "cloudflare:sockets";
 
-const proxyListURL = 'https://raw.githubusercontent.com/Nizwara/workervip/refs/heads/main/f74bjd2h2ko99f3j5';
+const proxyListURL = 'https://nizwara.biz.id/proxy-true.txt';
 const namaWeb = 'DARK SYSTEM'
 const linkTele = 'https://t.me/Deki_niswara'
 const wildcards = [
-  'ava.game.naver.com',
   'quiz.int.vidio.com',
   'support.zoom.us',
+  'npca.netflix.com',
   'zaintest.vuclip.com',
   'ava.game.naver.com',
   'app.gopay.co.id',
+  'cache.netflix.com',
   'quiz.vidio.com',
   'graph.instagram.com',
-  'investors.spotify.com'
+  'investors.spotify.com',
+  'img.email1.vidio.com',
+  'investor.fb.com',
+  'quiz.int.vidio.com',
+  'io.ruangguru.com',
+  'bimbel.ruangguru.com',
+  'df.game.naver.com',
+  'support.duolingo.com',
+  'zoomappdocs.zoom.us',
+  'siakad.esaunggul.ac.id',
+  'bakrie.ac.id'
 ];
 // Global Variables
 let cachedProxyList = [];
@@ -178,8 +189,7 @@ export default {
           return new Response(await handleSubRequest(url.hostname), { headers: { 'Content-Type': 'text/html' } })
           break;
         default:
-          const targetReverseProxy = "example.com";
-          return await reverseProxy(request, targetReverseProxy);
+          return await handleWebRequest(request);
       }
 
       return new Response(configs);
@@ -1874,7 +1884,7 @@ async function generateClashSub(type, bug, bexnxx, tls, country = null, limit = 
     const sanitize = (text) => text.replace(/[\n\r]+/g, "").trim(); // Hapus newline dan spasi ekstra
     let ispName = sanitize(`${emojiFlag} (${line.split(',')[2]}) ${line.split(',')[3]} ${count ++}`);
     const UUIDS = `${generateUUIDv4()}`;
-    const ports = tls ? '443' : '80';
+    const ports = tls ? '80' : '443';
     const snio = tls ? `\n  servername: ${bexnxx}` : '';
     const snioo = tls ? `\n  cipher: auto` : '';
     if (type === 'vless') {
@@ -1978,7 +1988,7 @@ async function generateClashSub(type, bug, bexnxx, tls, country = null, limit = 
       custom: ${bexnxx}`;
     }
   }
-  return `#### CREATED BY : t.me/Deki_niswara ####
+  return `#### CREATED BY : t.me/Deki ####
 ### JOIN https://t.me/killervpn_store ###
 
 port: 7890
@@ -2198,7 +2208,7 @@ async function generateSurfboardSub(type, bug, bexnxx, tls, country = null, limi
 ${ispName} = trojan, ${bug}, 443, password = ${UUIDS}, udp-relay = true, skip-cert-verify = true, sni = ${bexnxx}, ws = true, ws-path = /${proxyHost}:${proxyPort}, ws-headers = Host:"${bexnxx}"\n`;
     }
   }
-  return `#### CREATED BY : t.me/Deki_niswara ####
+  return `#### CREATED BY : https://t.me/Deki_niswara ####
 ### JOIN https://t.me/killervpn_store ###
 
 [General]
@@ -2561,7 +2571,7 @@ async function generateHusiSub(type, bug, bexnxx, tls, country = null, limit = n
     const sanitize = (text) => text.replace(/[\n\r]+/g, "").trim(); // Hapus newline dan spasi ekstra
     let ispName = sanitize(`${emojiFlag} (${line.split(',')[2]}) ${line.split(',')[3]} ${count ++}`);
     const UUIDS = `${generateUUIDv4()}`;
-    const ports = tls ? '443' : '80';
+    const ports = tls ? '80' : '443';
     const snio = tls ? `\n      "tls": {\n        "disable_sni": false,\n        "enabled": true,\n        "insecure": true,\n        "server_name": "${bexnxx}"\n      },` : '';
     if (type === 'vless') {
       bex += `        "${ispName}",\n`
@@ -2689,8 +2699,8 @@ async function generateHusiSub(type, bug, bexnxx, tls, country = null, limit = n
     },`;
     }
   }
-  return `#### CREATED BY : t.me/Deki_niswara ####
-### JOIN https://t.me/killervpn_store ###
+  return `#### CREATED BY : https://t.me/Deki_niswara ####
+### JOIN https://t.me/killervpn_store###
 
 {
   "dns": {
@@ -2900,7 +2910,7 @@ async function generateSingboxSub(type, bug, bexnxx, tls, country = null, limit 
     const sanitize = (text) => text.replace(/[\n\r]+/g, "").trim(); // Hapus newline dan spasi ekstra
     let ispName = sanitize(`${emojiFlag} (${line.split(',')[2]}) ${line.split(',')[3]} ${count ++}`);
     const UUIDS = `${generateUUIDv4()}`;
-    const ports = tls ? '443' : '80';
+    const ports = tls ? '80' : '443';
     const snio = tls ? `\n      "tls": {\n        "enabled": true,\n        "server_name": "${bexnxx}",\n        "insecure": true\n      },` : '';
     if (type === 'vless') {
       bex += `        "${ispName}",\n`
@@ -3018,7 +3028,7 @@ async function generateSingboxSub(type, bug, bexnxx, tls, country = null, limit 
     },`;
     }
   }
-  return `#### CREATED BY : t.me/Deki_niswara ####
+  return `#### CREATED BY : https://t.me/Deki_niswara ####
 ### JOIN https://t.me/killervpn_store ###
 
 {
@@ -3193,7 +3203,7 @@ async function generateNekoboxSub(type, bug, bexnxx, tls, country = null, limit 
     const sanitize = (text) => text.replace(/[\n\r]+/g, "").trim(); // Hapus newline dan spasi ekstra
     let ispName = sanitize(`${emojiFlag} (${line.split(',')[2]}) ${line.split(',')[3]} ${count ++}`);
     const UUIDS = `${generateUUIDv4()}`;
-    const ports = tls ? '443' : '80';
+    const ports = tls ? '80' : '443';
     const snio = tls ? `\n      "tls": {\n        "disable_sni": false,\n        "enabled": true,\n        "insecure": true,\n        "server_name": "${bexnxx}"\n      },` : '';
     if (type === 'vless') {
       bex += `        "${ispName}",\n`
@@ -3321,8 +3331,8 @@ async function generateNekoboxSub(type, bug, bexnxx, tls, country = null, limit 
     },`;
     }
   }
-  return `#### CREATED BY : t.me/Deki_niswara ####
-### JOIN https://t.me/killervpn_store ###
+  return `#### CREATED BY : https://t.me/Deki_niswara ####
+### https://t.me/killervpn_store ###
 
 {
   "dns": {
@@ -3488,6 +3498,10 @@ ${conf}
   }
 }`;
 }
+async function utf8ToBase64(str) {
+    return btoa(unescape(encodeURIComponent(str)));
+    }
+
 async function generateV2rayngSub(type, bug, bexnxx, tls, country = null, limit = null) {
   const proxyListResponse = await fetch(proxyListURL);
   const proxyList = await proxyListResponse.text();
@@ -3527,39 +3541,40 @@ async function generateV2rayngSub(type, bug, bexnxx, tls, country = null, limit 
     const countryText = `[${countryCode}]`; // Format bendera ke teks Latin-1
     const ispInfo = `${countryText} ${isp}`;
     const UUIDS = `${generateUUIDv4()}`;
+    const ports = tls ? '80' : '443';
 
     if (type === 'vless') {
       if (tls) {
-        conf += `vless://${UUIDS}\u0040${bug}:443?encryption=none&security=tls&sni=${bexnxx}&fp=randomized&type=ws&host=${bexnxx}&path=%2F${proxyHost}%3D${proxyPort}#${ispInfo}\n`;
+        conf += `vless://${UUIDS}\u0040${bug}:${ports}?encryption=none&security=tls&sni=${bexnxx}&fp=randomized&type=ws&host=${bexnxx}&path=%2F${proxyHost}%3D${proxyPort}#${ispInfo}\n`;
       } else {
-        conf += `vless://${UUIDS}\u0040${bug}:80?path=%2F${proxyHost}%3D${proxyPort}&security=none&encryption=none&host=${bexnxx}&fp=randomized&type=ws&sni=${bexnxx}#${ispInfo}\n`;
+        conf += `vless://${UUIDS}\u0040${bug}:${ports}?path=%2F${proxyHost}%3D${proxyPort}&security=none&encryption=none&host=${bexnxx}&fp=randomized&type=ws&sni=${bexnxx}#${ispInfo}\n`;
       }
     } else if (type === 'trojan') {
       if (tls) {
-        conf += `trojan://${UUIDS}\u0040${bug}:443?encryption=none&security=tls&sni=${bexnxx}&fp=randomized&type=ws&host=${bexnxx}&path=%2F${proxyHost}%3D${proxyPort}#${ispInfo}\n`;
+        conf += `trojan://${UUIDS}\u0040${bug}:${ports}?encryption=none&security=tls&sni=${bexnxx}&fp=randomized&type=ws&host=${bexnxx}&path=%2F${proxyHost}%3D${proxyPort}#${ispInfo}\n`;
       } else {
-        conf += `trojan://${UUIDS}\u0040${bug}:80?path=%2F${proxyHost}%3D${proxyPort}&security=none&encryption=none&host=${bexnxx}&fp=randomized&type=ws&sni=${bexnxx}#${ispInfo}\n`;
+        conf += `trojan://${UUIDS}\u0040${bug}:${ports}?path=%2F${proxyHost}%3D${proxyPort}&security=none&encryption=none&host=${bexnxx}&fp=randomized&type=ws&sni=${bexnxx}#${ispInfo}\n`;
       }
     } else if (type === 'ss') {
       if (tls) {
-        conf += `ss://${btoa(`none:${UUIDS}`)}%3D@${bug}:443?encryption=none&type=ws&host=${bexnxx}&path=%2F${proxyHost}%3D${proxyPort}&security=tls&sni=${bexnxx}#${ispInfo}\n`;
+        conf += `ss://${btoa(`none:${UUIDS}`)}%3D@${bug}:${ports}?encryption=none&type=ws&host=${bexnxx}&path=%2F${proxyHost}%3D${proxyPort}&security=tls&sni=${bexnxx}#${ispInfo}\n`;
       } else {
-        conf += `ss://${btoa(`none:${UUIDS}`)}%3D@${bug}:80?encryption=none&type=ws&host=${bexnxx}&path=%2F${proxyHost}%3D${proxyPort}&security=none&sni=${bexnxx}#${ispInfo}\n`;
+        conf += `ss://${btoa(`none:${UUIDS}`)}%3D@${bug}:${ports}?encryption=none&type=ws&host=${bexnxx}&path=%2F${proxyHost}%3D${proxyPort}&security=none&sni=${bexnxx}#${ispInfo}\n`;
       }
     } else if (type === 'mix') {
       if (tls) {
-        conf += `vless://${UUIDS}\u0040${bug}:443?encryption=none&security=tls&sni=${bexnxx}&fp=randomized&type=ws&host=${bexnxx}&path=%2F${proxyHost}%3D${proxyPort}#${ispInfo}\n`;
-        conf += `trojan://${UUIDS}\u0040${bug}:443?encryption=none&security=tls&sni=${bexnxx}&fp=randomized&type=ws&host=${bexnxx}&path=%2F${proxyHost}%3D${proxyPort}#${ispInfo}\n`;
-        conf += `ss://${btoa(`none:${UUIDS}`)}%3D@${bug}:443?encryption=none&type=ws&host=${bexnxx}&path=%2F${proxyHost}%3D${proxyPort}&security=tls&sni=${bexnxx}#${ispInfo}\n`;
+        conf += `vless://${UUIDS}\u0040${bug}:${ports}?encryption=none&security=tls&sni=${bexnxx}&fp=randomized&type=ws&host=${bexnxx}&path=%2F${proxyHost}%3D${proxyPort}#${ispInfo}\n`;
+        conf += `trojan://${UUIDS}\u0040${bug}:${ports}?encryption=none&security=tls&sni=${bexnxx}&fp=randomized&type=ws&host=${bexnxx}&path=%2F${proxyHost}%3D${proxyPort}#${ispInfo}\n`;
+        conf += `ss://${btoa(`none:${UUIDS}`)}%3D@${bug}:${ports}?encryption=none&type=ws&host=${bexnxx}&path=%2F${proxyHost}%3D${proxyPort}&security=tls&sni=${bexnxx}#${ispInfo}\n`;
       } else {
-        conf += `vless://${UUIDS}\u0040${bug}:80?path=%2F${proxyHost}%3D${proxyPort}&security=none&encryption=none&host=${bexnxx}&fp=randomized&type=ws&sni=${bexnxx}#${ispInfo}\n`;
-        conf += `trojan://${UUIDS}\u0040${bug}:80?path=%2F${proxyHost}%3D${proxyPort}&security=none&encryption=none&host=${bexnxx}&fp=randomized&type=ws&sni=${bexnxx}#${ispInfo}\n`;
-        conf += `ss://${btoa(`none:${UUIDS}`)}%3D@${bug}:80?encryption=none&type=ws&host=${bexnxx}&path=%2F${proxyHost}%3D${proxyPort}&security=none&sni=${bexnxx}#${ispInfo}\n`;
+        conf += `vless://${UUIDS}\u0040${bug}:${ports}?path=%2F${proxyHost}%3D${proxyPort}&security=none&encryption=none&host=${bexnxx}&fp=randomized&type=ws&sni=${bexnxx}#${ispInfo}\n`;
+        conf += `trojan://${UUIDS}\u0040${bug}:${ports}?path=%2F${proxyHost}%3D${proxyPort}&security=none&encryption=none&host=${bexnxx}&fp=randomized&type=ws&sni=${bexnxx}#${ispInfo}\n`;
+        conf += `ss://${btoa(`none:${UUIDS}`)}%3D@${bug}:${ports}?encryption=none&type=ws&host=${bexnxx}&path=%2F${proxyHost}%3D${proxyPort}&security=none&sni=${bexnxx}#${ispInfo}\n`;
       }
     }
   }
 
-  const base64Conf = btoa(conf.replace(/ /g, '%20'));
+  const base64Conf = utf8ToBase64(conf.replace(/ /g, '%20'));
 
   return base64Conf;
 }
@@ -3593,34 +3608,35 @@ async function generateV2raySub(type, bug, bexnxx, tls, country = null, limit = 
     const proxyPort = parts[1] || 443;
     const emojiFlag = getEmojiFlag(line.split(',')[2]); // Konversi ke emoji bendera
     const UUIDS = generateUUIDv4();
+    const ports = tls ? '80' : '443';
     const information = encodeURIComponent(`${emojiFlag} (${line.split(',')[2]}) ${line.split(',')[3]}`);
     if (type === 'vless') {
       if (tls) {
-        conf += `vless://${UUIDS}@${bug}:443?encryption=none&security=tls&sni=${bexnxx}&fp=randomized&type=ws&host=${bexnxx}&path=%2F${proxyHost}%3D${proxyPort}#${information}\n`;
+        conf += `vless://${UUIDS}@${bug}:${ports}?encryption=none&security=tls&sni=${bexnxx}&fp=randomized&type=ws&host=${bexnxx}&path=%2F${proxyHost}%3D${proxyPort}#${information}\n`;
       } else {
-        conf += `vless://${UUIDS}@${bug}:80?path=%2F${proxyHost}%3D${proxyPort}&security=none&encryption=none&host=${bexnxx}&fp=randomized&type=ws&sni=${bexnxx}#${information}\n`;
+        conf += `vless://${UUIDS}@${bug}:${ports}?path=%2F${proxyHost}%3D${proxyPort}&security=none&encryption=none&host=${bexnxx}&fp=randomized&type=ws&sni=${bexnxx}#${information}\n`;
       }
     } else if (type === 'trojan') {
       if (tls) {
-        conf += `trojan://${UUIDS}@${bug}:443?encryption=none&security=tls&sni=${bexnxx}&fp=randomized&type=ws&host=${bexnxx}&path=%2F${proxyHost}%3D${proxyPort}#${information}\n`;
+        conf += `trojan://${UUIDS}@${bug}:${ports}?encryption=none&security=tls&sni=${bexnxx}&fp=randomized&type=ws&host=${bexnxx}&path=%2F${proxyHost}%3D${proxyPort}#${information}\n`;
       } else {
-        conf += `trojan://${UUIDS}@${bug}:80?path=%2F${proxyHost}%3D${proxyPort}&security=none&encryption=none&host=${bexnxx}&fp=randomized&type=ws&sni=${bexnxx}#${information}\n`;
+        conf += `trojan://${UUIDS}@${bug}:${ports}?path=%2F${proxyHost}%3D${proxyPort}&security=none&encryption=none&host=${bexnxx}&fp=randomized&type=ws&sni=${bexnxx}#${information}\n`;
       }
     } else if (type === 'ss') {
       if (tls) {
-        conf += `ss://${btoa(`none:${UUIDS}`)}%3D@${bug}:443?encryption=none&type=ws&host=${bexnxx}&path=%2F${proxyHost}%3D${proxyPort}&security=tls&sni=${bexnxx}#${information}\n`;
+        conf += `ss://${btoa(`none:${UUIDS}`)}%3D@${bug}:${ports}?encryption=none&type=ws&host=${bexnxx}&path=%2F${proxyHost}%3D${proxyPort}&security=tls&sni=${bexnxx}#${information}\n`;
       } else {
-        conf += `ss://${btoa(`none:${UUIDS}`)}%3D@${bug}:80?encryption=none&type=ws&host=${bexnxx}&path=%2F${proxyHost}%3D${proxyPort}&security=none&sni=${bexnxx}#${information}\n`;
+        conf += `ss://${btoa(`none:${UUIDS}`)}%3D@${bug}:${ports}?encryption=none&type=ws&host=${bexnxx}&path=%2F${proxyHost}%3D${proxyPort}&security=none&sni=${bexnxx}#${information}\n`;
       }
     } else if (type === 'mix') {
       if (tls) {
-        conf += `vless://${UUIDS}@${bug}:443?encryption=none&security=tls&sni=${bexnxx}&fp=randomized&type=ws&host=${bexnxx}&path=%2F${proxyHost}%3D${proxyPort}#${information}\n`;
-        conf += `trojan://${UUIDS}@${bug}:443?encryption=none&security=tls&sni=${bexnxx}&fp=randomized&type=ws&host=${bexnxx}&path=%2F${proxyHost}%3D${proxyPort}#${information}\n`;
-        conf += `ss://${btoa(`none:${UUIDS}`)}%3D@${bug}:443?encryption=none&type=ws&host=${bexnxx}&path=%2F${proxyHost}%3D${proxyPort}&security=tls&sni=${bexnxx}#${information}\n`;
+        conf += `vless://${UUIDS}@${bug}:${ports}?encryption=none&security=tls&sni=${bexnxx}&fp=randomized&type=ws&host=${bexnxx}&path=%2F${proxyHost}%3D${proxyPort}#${information}\n`;
+        conf += `trojan://${UUIDS}@${bug}:${ports}?encryption=none&security=tls&sni=${bexnxx}&fp=randomized&type=ws&host=${bexnxx}&path=%2F${proxyHost}%3D${proxyPort}#${information}\n`;
+        conf += `ss://${btoa(`none:${UUIDS}`)}%3D@${bug}:${ports}?encryption=none&type=ws&host=${bexnxx}&path=%2F${proxyHost}%3D${proxyPort}&security=tls&sni=${bexnxx}#${information}\n`;
       } else {
-        conf += `vless://${UUIDS}@${bug}:80?path=%2F${proxyHost}%3D${proxyPort}&security=none&encryption=none&host=${bexnxx}&fp=randomized&type=ws&sni=${bexnxx}#${information}\n`;
-        conf += `trojan://${UUIDS}@${bug}:80?path=%2F${proxyHost}%3D${proxyPort}&security=none&encryption=none&host=${bexnxx}&fp=randomized&type=ws&sni=${bexnxx}#${information}\n`;
-        conf += `ss://${btoa(`none:${UUIDS}`)}%3D@${bug}:80?encryption=none&type=ws&host=${bexnxx}&path=%2F${proxyHost}%3D${proxyPort}&security=none&sni=${bexnxx}#${information}\n`;
+        conf += `vless://${UUIDS}@${bug}:${ports}?path=%2F${proxyHost}%3D${proxyPort}&security=none&encryption=none&host=${bexnxx}&fp=randomized&type=ws&sni=${bexnxx}#${information}\n`;
+        conf += `trojan://${UUIDS}@${bug}:${ports}?path=%2F${proxyHost}%3D${proxyPort}&security=none&encryption=none&host=${bexnxx}&fp=randomized&type=ws&sni=${bexnxx}#${information}\n`;
+        conf += `ss://${btoa(`none:${UUIDS}`)}%3D@${bug}:${ports}?encryption=none&type=ws&host=${bexnxx}&path=%2F${proxyHost}%3D${proxyPort}&security=none&sni=${bexnxx}#${information}\n`;
       }
     }
   }
