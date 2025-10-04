@@ -78,6 +78,27 @@ export default {
     try {
       const url = new URL(request.url);
       const upgradeHeader = request.headers.get("Upgrade");
+      const myurl = "geovpn.vercel.app";
+      const CHECK_API_BASE = `https://${myurl}`;
+      const CHECK_API = `${CHECK_API_BASE}/check?ip=`;
+
+      if (url.pathname === "/geo-ip") {
+        const ip = url.searchParams.get("ip");
+
+        if (!ip) {
+          return new Response("IP parameter is required", { status: 400 });
+        }
+
+        const apiResponse = await fetch(`${CHECK_API}${ip}`);
+        if (!apiResponse.ok) {
+          return new Response("Failed to fetch IP information", { status: apiResponse.status });
+        }
+
+        const data = await apiResponse.json();
+        return new Response(JSON.stringify(data), {
+          headers: { "Content-Type": "application/json" },
+        });
+      }
 
       // Map untuk menyimpan proxy per country code
       const proxyState = new Map();
@@ -636,11 +657,13 @@ async function handleWebRequest(request) {
         const uuid = generateUUIDv4();
         const wildcard = selectedWildcard || hostName;
         const modifiedHostName = selectedWildcard ? `${selectedWildcard}.${hostName}` : hostName;
+        const ipPort = `${config.ip}:${config.port}`;
 
         if (configType === 'tls') {
             return `
                 <tr class="config-row">
-                    <td class="ip-cell">${config.ip}:${config.port}</td>
+                    <td class="ip-cell">${ipPort}</td>
+                    <td class="status-cell" id="status-${ipPort}">Checking...</td>
                     <td class="country-cell">${config.countryCode} ${getFlagEmoji(config.countryCode)}</td>
                     <td class="isp-cell">${config.isp}</td>
                     <td class="path-cell">${config.path}</td>
@@ -663,7 +686,8 @@ async function handleWebRequest(request) {
         } else {
             return `
                 <tr class="config-row">
-                    <td class="ip-cell">${config.ip}:${config.port}</td>
+                    <td class="ip-cell">${ipPort}</td>
+                    <td class="status-cell" id="status-${ipPort}">Checking...</td>
                     <td class="country-cell">${config.countryCode} ${getFlagEmoji(config.countryCode)}</td>
                     <td class="isp-cell">${config.isp}</td>
                     <td class="path-cell">${config.path}</td>
@@ -1208,6 +1232,7 @@ async function handleWebRequest(request) {
                 <thead>
                     <tr>
                         <th>IP:PORT</th>
+                        <th>STATUS</th>
                         <th>COUNTRY</th>
                         <th>ISP</th>
                         <th>PATH</th>
@@ -1305,6 +1330,36 @@ async function handleWebRequest(request) {
         });
 
         document.getElementById('search-button').addEventListener('click', executeSearch);
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const configRows = document.querySelectorAll('.config-row');
+            configRows.forEach(row => {
+                const ipPort = row.querySelector('.ip-cell').textContent;
+                const statusCell = row.querySelector("#status-" + ipPort);
+
+                fetch("/geo-ip?ip=" + ipPort)
+                    .then(response => response.json())
+                    .then(data => {
+                        const status = data.status || 'UNKNOWN';
+                        let delay = parseFloat(data.delay) || 'N/A';
+
+                        if (!isNaN(delay)) {
+                            delay = Math.round(delay);
+                        }
+
+                        if (status === 'ACTIVE') {
+                            statusCell.innerHTML = '<span style="color: #00ff88;">ACTIVE</span> (' + delay + 'ms)';
+                        } else if (status === 'DEAD') {
+                            statusCell.innerHTML = '<span style="color: #ff3366;">DEAD</span>';
+                        } else {
+                            statusCell.innerHTML = '<span style="color: #00ffff;">UNKNOWN</span>';
+                        }
+                    })
+                    .catch(() => {
+                        statusCell.innerHTML = '<span style="color: #ff3366;">ERROR</span>';
+                    });
+            });
+        });
     </script>
 </body>
 </html>
